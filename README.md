@@ -14,7 +14,8 @@ renders a CRD any more; this bundle is the only installer of platform CRDs.
 - CI (`.github/workflows/ci.yaml`) re-renders and fails on drift, checks every upstream directory is fully referenced,
   rejects Gateway API / Traefik Hub / Calico CRDs, rejects duplicates, applies the bundle to a kind cluster at the fleet's
   Kubernetes version, round-trips the package through `helm show crds`, and guards against removed API versions.
-- Releases (`release-please`, tag `vX.Y.Z`) publish the chart to `oci://ghcr.io/glueops/platform-crds`, pulled by
+- Releases (`release-please`, tag `vX.Y.Z`; the bundle stays on 0.x — a breaking change bumps the minor, a feature
+  bumps the patch — until it is promoted to 1.0 deliberately) publish the chart to `oci://ghcr.io/glueops/platform-crds`, pulled by
   captain_utils through `ghcr.repo.gpkg.io`. The chart is **packaging only**: `Chart.yaml` + `crds/`; it is applied by
   captain_utils with `kubectl apply --server-side --force-conflicts` before ArgoCD and before the platform chart.
   Never `helm install` it.
