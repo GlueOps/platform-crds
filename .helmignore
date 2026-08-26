@@ -1,0 +1,12 @@
+# Only Chart.yaml and crds/ belong in the package.
+.git/
+.github/
+.helmignore
+hack/
+glueops/
+kustomization.yaml
+*.md
+LICENSE
+renovate.json
+release-please-config.json
+.release-please-manifest.json

@@ -11,6 +11,7 @@ on:
 jobs:
   publish-oci:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
@@ -26,6 +27,11 @@ jobs:
           helm package . --version "$v" --app-version "$v" -d /tmp/pkg
           helm push "/tmp/pkg/platform-crds-$v.tgz" oci://ghcr.io/glueops
           helm registry logout ghcr.io
+      - name: Assert the package is anonymously pullable on ghcr.io (never probe the mirror while it is private)
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          helm show chart "oci://ghcr.io/glueops/platform-crds" --version "$v" >/dev/null 2>&1 || {
+            echo "::error::ghcr.io/glueops/platform-crds is not anonymously pullable. First release? Set the package to Public under https://github.com/orgs/GlueOps/packages/container/platform-crds/settings and re-run this job (the mirror negative-caches misses)."; exit 1; }
       - name: Prove the package is pullable through the mirror (and warm its cache)
         run: |
           v="${GITHUB_REF_NAME#v}"; want=$(ls crds | wc -l)

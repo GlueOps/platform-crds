@@ -1,0 +1,148 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gates.platform.glueops.dev
+spec:
+  group: platform.glueops.dev
+  names:
+    kind: Gate
+    plural: gates
+    shortNames:
+      - gate
+    singular: gate
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                checks:
+                  items:
+                    properties:
+                      argoApplicationHealthy:
+                        properties:
+                          name:
+                            minLength: 1
+                            type: string
+                          requireHealthy:
+                            default: true
+                            type: boolean
+                          requireSynced:
+                            default: true
+                            type: boolean
+                        required:
+                          - name
+                        type: object
+                      deploymentAvailable:
+                        properties:
+                          minAvailableReplicas:
+                            default: 1
+                            minimum: 0
+                            type: integer
+                          name:
+                            minLength: 1
+                            type: string
+                        required:
+                          - name
+                        type: object
+                      id:
+                        maxLength: 63
+                        minLength: 1
+                        type: string
+                      jobComplete:
+                        properties:
+                          name:
+                            minLength: 1
+                            type: string
+                        required:
+                          - name
+                        type: object
+                      namespace:
+                        maxLength: 63
+                        minLength: 1
+                        type: string
+                      podLabelReady:
+                        properties:
+                          minReadyPods:
+                            default: 1
+                            minimum: 0
+                            type: integer
+                          selector:
+                            minLength: 1
+                            type: string
+                        required:
+                          - selector
+                        type: object
+                      serviceReadyEndpoints:
+                        properties:
+                          minReadyAddresses:
+                            default: 1
+                            minimum: 0
+                            type: integer
+                          name:
+                            minLength: 1
+                            type: string
+                        required:
+                          - name
+                        type: object
+                      statefulSetReady:
+                        properties:
+                          minReadyReplicas:
+                            default: 1
+                            minimum: 0
+                            type: integer
+                          name:
+                            minLength: 1
+                            type: string
+                          requireUpdatedRevision:
+                            default: true
+                            type: boolean
+                        required:
+                          - name
+                        type: object
+                    required:
+                      - id
+                    type: object
+                  minItems: 1
+                  type: array
+                strict:
+                  default: true
+                  description: If true, the gate will be marked failed if any checks reference disallowed resource kinds or targets. If false, such checks will be ignored but the gate can still pass if all other checks pass.
+                  type: boolean
+              required:
+                - checks
+              type: object
+            status:
+              properties:
+                lastEvaluatedTime:
+                  format: date-time
+                  type: string
+                observedGeneration:
+                  type: integer
+                ready:
+                  type: boolean
+                results:
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      message:
+                        type: string
+                      ready:
+                        type: boolean
+                    required:
+                      - id
+                      - ready
+                    type: object
+                  type: array
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
