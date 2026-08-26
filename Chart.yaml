@@ -2,7 +2,7 @@ apiVersion: v2
 name: platform-crds
 description: GlueOps platform CRD bundle (layer-0; consume with helm show crds)
 type: application
-version: 0.0.0
+version: 0.0.1
 appVersion: "0.0.0"
 home: https://github.com/GlueOps/platform-crds
 sources:
