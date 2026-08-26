@@ -15,7 +15,14 @@ renders a CRD any more; this bundle is the only installer of platform CRDs.
   rejects Gateway API / Traefik Hub / Calico CRDs, rejects duplicates, applies the bundle to a kind cluster at the fleet's
   Kubernetes version, round-trips the package through `helm show crds`, and guards against removed API versions.
 - Releases (`release-please`, tag `vX.Y.Z`) publish the chart to `oci://ghcr.io/glueops/platform-crds`, pulled by
-  captain_utils through `ghcr.repo.gpkg.io`. The chart is **packaging only**: `Chart.yaml` + `crds/`. Never `helm install` it.
+  captain_utils through `ghcr.repo.gpkg.io`. The chart is **packaging only**: `Chart.yaml` + `crds/`; it is applied by
+  captain_utils with `kubectl apply --server-side --force-conflicts` before ArgoCD and before the platform chart.
+  Never `helm install` it.
+- **First release only:** GitHub creates the GHCR package *private*. After the first `publish` run fails its
+  "anonymously pullable" step, set https://github.com/orgs/GlueOps/packages/container/platform-crds/settings to
+  **Public** and re-run the job (it deliberately checks ghcr.io before touching the mirror, which negative-caches misses).
+- Keep `Chart.yaml`'s `description` under 80 characters: release-please re-serialises Chart.yaml and folds longer
+  scalars, which would make the render-drift check fail on every release PR (CI enforces this).
 
 ## Operating
 

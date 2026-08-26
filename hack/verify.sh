@@ -29,10 +29,12 @@ bad=$(ls crds | grep -E '\.(gateway\.networking\.k8s\.io|hub\.traefik\.io|projec
 dups=$(echo "$rendered" | uniq -d); [ -z "$dups" ] || fail "duplicate CRD names: $dups"
 # 5. package round-trip: helm show crds must yield exactly one YAML document per file
 tmp=$(mktemp -d); helm package . --version 0.0.0-verify -d "$tmp" >/dev/null
-docs=$(helm show crds "$tmp"/platform-crds-0.0.0-verify.tgz | yq -N '.metadata.name' | grep -vc '^---$')
+docs=$(helm show crds "$tmp"/platform-crds-0.0.0-verify.tgz | yq -N '.metadata.name' | grep -v '^---$' | wc -l)
 [ "$docs" -eq "$(ls crds | wc -l)" ] || fail "helm show crds yields $docs documents for $(ls crds | wc -l) files"
 tar tzf "$tmp"/platform-crds-0.0.0-verify.tgz | grep -vE '^platform-crds/(Chart\.yaml|crds/.*\.yaml)$' | grep -q . && fail "package contains files other than Chart.yaml and crds/: $(tar tzf "$tmp"/*.tgz | grep -vE 'Chart.yaml|crds/')" || true
 rm -rf "$tmp"
-# 6. pins present
+# 6. Chart.yaml invariants: pins present; description short enough that release-please's YAML serializer (lineWidth 80)
+#    does not fold it — a folded description would make the render-drift check fail on every release PR
+[ "$(yq -r '.description | length' Chart.yaml)" -lt 80 ] || fail "Chart.yaml description must stay under 80 characters (release-please folds longer plain scalars)"
 for p in argo-cd cert-manager external-secrets vpa traefik kube-prometheus-stack keda metacontroller fluent-operator external-dns; do yq -e ".annotations.\"glueops.dev/pin.$p\" | length > 0" Chart.yaml >/dev/null || fail "Chart.yaml missing pin annotation for $p"; done
 echo "✅ verify: $(ls crds | wc -l) CRDs, complete, no forbidden groups, no duplicates, package round-trips, pins present"

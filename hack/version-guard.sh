@@ -6,10 +6,16 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 base=$1; pr=${2:-}
+git rev-parse --verify -q "$base^{commit}" >/dev/null || { echo "❌ base ref '$base' not found (fetch-depth: 0?)"; exit 1; }
 removed=""
+# a CRD file that disappeared from crds/ counts as every one of its versions removed
+for gone in $(comm -23 <(git ls-tree --name-only "$base" crds/ 2>/dev/null | sed 's#crds/##' | sort) <(ls crds | sort)); do
+  removed="$removed ${gone%.yaml}(file-removed)"
+done
 for f in crds/*.yaml; do
   name=$(basename "$f" .yaml)
-  old=$(git show "$base:$f" 2>/dev/null | yq -N '.spec.versions[].name' | sort) || continue
+  git cat-file -e "$base:$f" 2>/dev/null || continue
+  old=$(git show "$base:$f" | yq -N '.spec.versions[].name' | sort)
   new=$(yq -N '.spec.versions[].name' "$f" | sort)
   gone=$(comm -23 <(echo "$old") <(echo "$new") || true)
   [ -z "$gone" ] || removed="$removed $name($(echo $gone | tr ' ' ','))"

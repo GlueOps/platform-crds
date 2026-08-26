@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 # Stamp the upstream version pins parsed from kustomization.yaml into Chart.yaml annotations
 # (the packaged chart otherwise carries no pins; the terraform module's consistency check reads them).
+# Edits Chart.yaml line by line on purpose: release-please rewrites Chart.yaml with a different YAML
+# serializer, and a whole-file re-serialisation here would make the render-drift check fail after every release.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 k=kustomization.yaml
-pin() { [ -n "$2" ] || { echo "pins.sh: could not parse pin for $1" >&2; exit 1; }; yq -i ".annotations.\"glueops.dev/pin.$1\" = \"$2\"" Chart.yaml; }
+grep -q '^annotations:' Chart.yaml || printf 'annotations:\n' >> Chart.yaml
+pin() {
+  [ -n "$2" ] || { echo "pins.sh: could not parse pin for $1" >&2; exit 1; }
+  if grep -q "^  glueops.dev/pin.$1:" Chart.yaml; then
+    sed -i "s#^  glueops.dev/pin.$1:.*#  glueops.dev/pin.$1: \"$2\"#" Chart.yaml
+  else
+    sed -i "/^annotations:/a\\  glueops.dev/pin.$1: \"$2\"" Chart.yaml
+  fi
+}
 pin argo-cd              "$(grep -oE 'argoproj/argo-cd/manifests/crds\?ref=v[0-9.]+' $k | head -1 | sed 's/.*ref=//')"
 pin cert-manager         "$(grep -oE 'cert-manager/cert-manager/releases/download/v[0-9.]+' $k | head -1 | sed 's#.*/##')"
 pin external-secrets     "$(grep -oE 'external-secrets/external-secrets/v[0-9.]+/' $k | head -1 | sed 's#.*/\(v[0-9.]*\)/#\1#')"
