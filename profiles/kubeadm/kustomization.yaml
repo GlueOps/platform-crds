@@ -1,0 +1,6 @@
+# platform-crds profile: kubeadm — CRDs for components the platform chart deploys ONLY when kubeadm.enabled=true.
+# Rendered by hack/render.sh into charts/kubeadm/crds/ and shipped as a conditional subchart, so a cluster gets these
+# only when its platform.yaml says kubeadm.enabled: true. Sources here must NOT appear in the root kustomization.yaml
+# (hack/verify.sh fails on a CRD present in more than one profile).
+resources:
+  - https://raw.githubusercontent.com/kubernetes/autoscaler/vertical-pod-autoscaler-1.6.0/vertical-pod-autoscaler/deploy/vpa-v1-crd-gen.yaml

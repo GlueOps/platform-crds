@@ -2,6 +2,14 @@ apiVersion: v2
 name: platform-crds
 description: GlueOps platform CRD bundle (layer-0; consume with helm show crds)
 type: application
+# Profiles: CRDs for conditionally-deployed components live in conditional subcharts, so a cluster installs only what
+# its platform.yaml turns on. `helm show crds` still returns the UNION (values-independent); consumers select with
+# `helm template --include-crds -f platform.yaml`. values.schema.json makes every profile key mandatory, so a renamed
+# or missing key is a hard error instead of a silent fallback to the base set.
+dependencies:
+  - name: kubeadm
+    version: 0.0.0
+    condition: kubeadm.enabled
 version: 0.0.1
 appVersion: "0.0.0"
 home: https://github.com/GlueOps/platform-crds

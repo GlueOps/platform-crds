@@ -1,0 +1,4 @@
+# Deliberately empty: no defaults for profile switches. values.schema.json marks them required, so the consumer must
+# state each one explicitly (captain_utils passes the cluster's platform.yaml) — a renamed key then fails loudly
+# instead of silently falling back to the base CRD set.
+{}
