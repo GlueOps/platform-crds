@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0](https://github.com/GlueOps/platform-crds/compare/v0.0.1...v0.1.0) (2026-08-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* consumers must switch from 'helm show crds' to 'helm template --include-crds -f platform.yaml'. 'helm show crds' still works and returns every CRD, so an older consumer installs the union rather than failing.
+
+### Features
+
+* install CRDs per cluster shape via conditional profile subcharts ([#54](https://github.com/GlueOps/platform-crds/issues/54)) ([c724fea](https://github.com/GlueOps/platform-crds/commit/c724fea2d5629ff58f9da43ca749d365a185e4cf))
+
 ## 0.0.1 (2026-08-26)
 
 
