@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/GlueOps/platform-crds/compare/v0.1.0...v0.1.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ci:** count every profile in the publish mirror probe ([#56](https://github.com/GlueOps/platform-crds/issues/56)) ([5374746](https://github.com/GlueOps/platform-crds/commit/53747461d5dc63a36cb5e68adf6ff494d9537b9b))
+
 ## [0.1.0](https://github.com/GlueOps/platform-crds/compare/v0.0.1...v0.1.0) (2026-08-27)
 
 
