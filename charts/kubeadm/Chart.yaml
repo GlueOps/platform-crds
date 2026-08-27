@@ -1,0 +1,6 @@
+apiVersion: v2
+name: kubeadm
+description: CRDs for platform components deployed only on kubeadm clusters
+type: application
+# Constant: this subchart is vendored, never fetched, and release-please only versions the parent chart.
+version: 0.0.0

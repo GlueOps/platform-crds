@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "platform-crds profile switches",
+  "description": "Every profile switch is required and has no default: a missing or renamed key must fail, not silently drop CRDs. Additional properties are allowed because consumers pass the platform chart's full values file.",
+  "type": "object",
+  "required": ["kubeadm"],
+  "properties": {
+    "kubeadm": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": { "enabled": { "type": "boolean", "description": "true on kubeadm clusters, where the platform chart deploys VPA" } }
+    }
+  }
+}

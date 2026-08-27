@@ -5,7 +5,9 @@
 # serializer, and a whole-file re-serialisation here would make the render-drift check fail after every release.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-k=kustomization.yaml
+# every profile's sources, so a pin that moved into profiles/<name>/ is still found
+k=$(mktemp); trap 'rm -f "$k"' EXIT
+cat kustomization.yaml profiles/*/kustomization.yaml > "$k"
 grep -q '^annotations:' Chart.yaml || printf 'annotations:\n' >> Chart.yaml
 pin() {
   [ -n "$2" ] || { echo "pins.sh: could not parse pin for $1" >&2; exit 1; }

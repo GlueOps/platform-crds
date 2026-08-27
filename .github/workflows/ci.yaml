@@ -27,7 +27,7 @@ jobs:
         run: |
           kubectl version --client; yq --version; helm version --short
           hack/render.sh
-          git status --porcelain crds Chart.yaml | tee /tmp/drift
+          git status --porcelain crds charts Chart.yaml | tee /tmp/drift
           [ ! -s /tmp/drift ] || { echo "::error::crds/ or Chart.yaml pins are stale — run hack/render.sh and commit"; exit 1; }
       - name: Verify (completeness, forbidden groups, duplicates, package round-trip, pins)
         run: hack/verify.sh
@@ -47,8 +47,10 @@ jobs:
           cluster_name: platform-crds
       - name: Server-side dry-run, apply, Established
         run: |
-          kubectl apply --server-side --force-conflicts --field-manager=glueops-platform-crds --dry-run=server -f crds/ | tail -3
-          kubectl apply --server-side --force-conflicts --field-manager=glueops-platform-crds -f crds/ | tail -3
+          # the union of every profile: a cluster only ever gets a subset, but all of it must apply cleanly
+          dirs=""; for d in crds charts/*/crds; do dirs="$dirs -f $d"; done; echo "applying:$dirs"
+          kubectl apply --server-side --force-conflicts --field-manager=glueops-platform-crds --dry-run=server $dirs | tail -3
+          kubectl apply --server-side --force-conflicts --field-manager=glueops-platform-crds $dirs | tail -3
           kubectl wait --for=condition=Established crd --all --timeout=180s > /dev/null
           echo "$(kubectl get crd --no-headers | wc -l) CRDs Established"
 
@@ -67,8 +69,24 @@ jobs:
       - run: |
           helm version --short
           helm package . --version 0.0.0-matrix -d /tmp/pkg >/dev/null
-          n=$(helm show crds /tmp/pkg/platform-crds-0.0.0-matrix.tgz | yq -N '.metadata.name' | grep -v '^---$' | wc -l)
-          [ "$n" -eq "$(ls crds | wc -l)" ] || { echo "::error::helm ${{ matrix.helm }}: $n documents for $(ls crds | wc -l) files"; exit 1; }
+          tgz=/tmp/pkg/platform-crds-0.0.0-matrix.tgz
+          total=$(ls crds charts/*/crds | grep -c '\.yaml$')
+          # helm show crds: the values-independent UNION, one document per file
+          n=$(helm show crds $tgz | yq -N '.metadata.name' | grep -v '^---$' | wc -l)
+          [ "$n" -eq "$total" ] || { echo "::error::helm ${{ matrix.helm }}: helm show crds gave $n documents for $total files"; exit 1; }
+          # helm template --include-crds: what a cluster actually installs, per profile (this is the consumer path)
+          render() { helm template x $tgz --include-crds -f /tmp/v.yaml | yq -N 'select(. != null and .kind == "CustomResourceDefinition") | .metadata.name' | grep -c . || true; }
+          base=$(ls crds | wc -l)
+          for p in $(ls -d profiles/*/ | xargs -n1 basename); do
+            printf '%s:\n  enabled: false\n' "$p" > /tmp/v.yaml; off=$(render)
+            printf '%s:\n  enabled: true\n'  "$p" > /tmp/v.yaml; on=$(render)
+            want=$(( base + $(ls charts/$p/crds | wc -l) ))
+            [ "$off" -eq "$base" ] && [ "$on" -eq "$want" ] || { echo "::error::helm ${{ matrix.helm }}: profile $p rendered off=$off on=$on, wanted $base/$want"; exit 1; }
+            echo "helm ${{ matrix.helm }}: profile $p off=$off on=$on ✓"
+          done
+          # a missing profile key must be a hard error, not a silent fallback to base
+          printf '{}\n' > /tmp/v.yaml
+          helm template x $tgz --include-crds -f /tmp/v.yaml >/dev/null 2>&1 && { echo "::error::helm ${{ matrix.helm }}: an empty values file rendered without error — profile keys are not mandatory"; exit 1; } || echo "helm ${{ matrix.helm }}: missing profile key rejected ✓"
 
   render-on-renovate:
     # renovate bumps a pin but cannot re-render; do it for it so renovate PRs are green without a human render.
@@ -91,8 +109,8 @@ jobs:
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
       - run: |
           hack/render.sh
-          if [ -n "$(git status --porcelain crds Chart.yaml)" ]; then
+          if [ -n "$(git status --porcelain crds charts Chart.yaml)" ]; then
             git config user.name github-actions && git config user.email github-actions[bot]@users.noreply.github.com
-            git add crds Chart.yaml && git commit -m "chore: re-render crds/ for renovate bump" && git push
+            git add crds charts Chart.yaml && git commit -m "chore: re-render crds/ for renovate bump" && git push
             echo "::notice::re-rendered crds/ and pushed to the renovate branch (re-run CI)"
           fi
