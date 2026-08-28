@@ -12,6 +12,12 @@ kubectl get <plural.group> -A -o json | kubectl replace -f -    # rewrites every
 kubectl patch crd <name> --subresource=status --type=merge -p '{"status":{"storedVersions":["<remaining versions>"]}}'
 ```
 
+The `kubectl replace` above is the upstream storage-migration recipe and is correct here: it rewrites the **custom
+resources**, one at a time, at the CRD's current storage version. It is not the same thing as replacing a CRD, which
+captain_utils deliberately no longer does — a whole-object PUT of a CRD erases `metadata.finalizers`, destroying a
+terminating CRD and orphaning its objects. Do not "fix" this line to an apply: apply would not rewrite the stored
+encoding, which is the entire point of the migration.
+
 | Bundle version | CRD(s) | Version removed | Notes |
 |---|---|---|---|
 | _(none yet)_ | | | |
