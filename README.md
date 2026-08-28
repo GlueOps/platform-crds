@@ -27,12 +27,32 @@ Every profile key is **mandatory**: `values.schema.json` marks it required and n
 renamed or missing key is a hard error (`at '/kubeadm': missing property 'enabled'`) rather than a silent fallback
 to the base set. `hack/verify.sh` proves each profile is reachable, additive, disjoint from the others, and mandatory.
 
-Adding a profile: create `profiles/<name>/kustomization.yaml`, add `<name>` to `dependencies` in `Chart.yaml` with
-`condition: <name>.enabled`, add it to `required` in `values.schema.json`, run `hack/render.sh`. The key must be one
-the platform chart already writes into `platform.yaml`, so nothing in captain_utils has to learn about it.
+### Why `kubeadm` is the only profile today
 
-The bundle still ships CRDs for components a cluster does not run when that is not gated on a values switch
-(fluentd, the ESO generators) — profiles are for cluster *shape*, not for every unused type.
+It is the platform chart's right-sizing gate. `kubeadm.enabled` comes from the chart's own `values.yaml`
+(`placeholder_enable_kubeadm_cluster`, filled in by terraform) and turns on Goldilocks and VPA — *"VPA is installed as
+the recommender backend for Goldilocks, so it shares the single `kubeadm.enabled` right-sizing gate"*
+(`templates/application-vpa.yaml`). VPA is the only component behind that gate that brings CRDs of its own, so its two
+are the entire profile.
+
+The test for whether something needs a profile: **the platform chart must already refuse to deploy it on some clusters
+via a values switch.** If it does not, the CRDs ship everywhere. The bundle deliberately carries fluentd's and the ESO
+generators' CRDs on clusters that run neither — profiles are for cluster *shape*, not for every unused type.
+
+### Adding a profile
+
+1. `profiles/<name>/kustomization.yaml` with the sources. They must not also appear in the root `kustomization.yaml`;
+   `hack/verify.sh` fails on a CRD present in more than one profile.
+2. `charts/<name>/Chart.yaml` — copy `charts/kubeadm/Chart.yaml` and change `name` and `description`. `hack/render.sh`
+   generates `charts/<name>/crds/` but **not** this file; without it `helm package` fails inside `hack/verify.sh`.
+3. `<name>` in `dependencies` in the root `Chart.yaml`, with `condition: <name>.enabled`.
+4. `<name>` in `required` in `values.schema.json`.
+5. `hack/render.sh && hack/verify.sh`.
+
+The key must be one the platform chart already writes into `platform.yaml`, so nothing in captain_utils has to learn
+about it. If the cluster flavour you are adding has no such key yet, add it to the platform chart first: a profile
+keyed on something no values file sets fails to render (`missing property 'enabled'`), which is the designed
+behaviour, not something to work around here.
 
 ## How it works
 
@@ -114,12 +134,20 @@ captain_utils → glueops-platform
 - Tenant-installed CRDs.
 - Traefik Hub and Gateway API CRDs — a separate future decision; the traefik source is filtered to `traefik.io`.
 
-The bundle is the union of CRDs any cluster flavour may need; unused CRDs on a given cluster (fluentd, VPA on EKS, ESO
-generators) are expected.
+The bundle is the union of CRDs any cluster flavour may need; unused CRDs on a given cluster (fluentd, the ESO
+generators) are expected. VPA is not one of them — it is profile-gated, so it never reaches a cluster with
+`kubeadm.enabled: false`.
 
 ## Adding or bumping a source
 
+**Bumping** an existing source is steps 1, 3 and 4 — normally a renovate PR, where the `render-on-renovate` job
+re-renders so the drift check passes.
+
 1. Edit `kustomization.yaml` (a directory source must contain its own `kustomization.yaml` upstream — otherwise list
    the files individually).
-2. `hack/render.sh && hack/verify.sh` (needs kubectl, helm, yq, jq, gh).
-3. Commit `crds/` and `Chart.yaml` with the change. CI repeats the checks and applies the bundle to kind.
+2. **A new upstream repo also needs a pin.** Add `owner/repo` → pin name to `hack/pins.map`, and a matching
+   `pin <name>` line to `hack/pins.sh` that parses the version out of the URL. `hack/verify.sh` fails on a repo with
+   no entry — without one the source ships with no `glueops.dev/pin.<name>` annotation, and the terraform module's
+   consistency check has nothing to compare against for it.
+3. `hack/render.sh && hack/verify.sh` (needs kubectl, helm, yq, jq, gh).
+4. Commit `crds/` and `Chart.yaml` with the change. CI repeats the checks and applies the bundle to kind.

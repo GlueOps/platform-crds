@@ -5,6 +5,7 @@
 # serializer, and a whole-file re-serialisation here would make the render-drift check fail after every release.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+source hack/pins.map   # PIN_FOR_REPO: owner/repo -> pin name; hack/verify.sh reads the same file
 # every profile's sources, so a pin that moved into profiles/<name>/ is still found
 k=$(mktemp); trap 'rm -f "$k"' EXIT
 cat kustomization.yaml profiles/*/kustomization.yaml > "$k"
@@ -27,3 +28,9 @@ pin keda                 "$(grep -oE 'kedacore/keda/v[0-9.]+/' $k | head -1 | se
 pin metacontroller       "$(grep -oE 'metacontroller/metacontroller/v[0-9.]+/' $k | head -1 | sed 's#metacontroller/metacontroller/##; s#/##')"
 pin fluent-operator      "$(grep -oE 'fluent-operator-[0-9.]+/' $k | head -1 | sed 's/fluent-operator-//; s#/##')"
 pin external-dns         "$(grep -oE 'external-dns-helm-chart-[0-9.]+/' $k | head -1 | sed 's/external-dns-helm-chart-//; s#/##')"
+
+# Every name declared in pins.map must have come out of a pin call above. Catches the other half of the two-file
+# change: a repo mapped there but with no extractor line above, which would otherwise leave the annotation missing.
+for name in "${PIN_FOR_REPO[@]}"; do
+  grep -q "^  glueops.dev/pin.$name:" Chart.yaml || { echo "pins.sh: hack/pins.map declares '$name' but no pin line above writes it" >&2; exit 1; }
+done
