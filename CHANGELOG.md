@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/GlueOps/platform-crds/compare/v0.1.2...v0.1.3) (2026-08-28)
+
+
+### Documentation
+
+* complete the add-a-source and add-a-profile recipes, and enforce pins ([#62](https://github.com/GlueOps/platform-crds/issues/62)) ([215be59](https://github.com/GlueOps/platform-crds/commit/215be59a9dbd90ba966e6f0d42820b23725beb8b))
+
 ## [0.1.2](https://github.com/GlueOps/platform-crds/compare/v0.1.1...v0.1.2) (2026-08-28)
 
 
