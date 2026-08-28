@@ -6,6 +6,8 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
   name: collectors.fluentbit.fluent.io
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: fluentbit.fluent.io
   names:

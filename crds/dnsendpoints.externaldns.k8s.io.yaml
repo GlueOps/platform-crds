@@ -5,6 +5,8 @@ metadata:
   annotations:
     api-approved.kubernetes.io: https://github.com/kubernetes-sigs/external-dns/pull/2007
   name: dnsendpoints.externaldns.k8s.io
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: externaldns.k8s.io
   names:

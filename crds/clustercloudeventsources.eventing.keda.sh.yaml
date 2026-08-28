@@ -5,6 +5,8 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.21.0
   name: clustercloudeventsources.eventing.keda.sh
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: eventing.keda.sh
   names:

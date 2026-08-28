@@ -71,6 +71,17 @@ for d in $(crd_dirs); do for f in "$d"/*.yaml; do
   [ "$n" -le 1 ] || fail "$f now serves $n versions: conversion becomes live for this type, so any stale spec.conversion webhook a previous installer left on a cluster starts failing reads — and the bundle cannot remove it. Audit the fleet, then add '$name' to multi_version_ok in $0 and note it in MIGRATIONS.md"
 done; done
 
+# 5c. every CRD carries the bundle label, with the exact key and value render.sh stamps. This is what makes
+#     `kubectl get crd -l platform.glueops.dev/bundle=platform-crds` the bundle's inventory on a cluster, and the
+#     apply owns it, so dropping it from a later bundle removes it. A new profile that skipped render() would fail here.
+for d in $(crd_dirs); do for f in "$d"/*.yaml; do
+  [ "$(yq -N '.metadata.labels["platform.glueops.dev/bundle"] // ""' "$f")" = "platform-crds" ] || fail "$f is missing label platform.glueops.dev/bundle=platform-crds — run hack/render.sh"
+done; done
+if ! grep -qE '^BUNDLE_LABEL_KEY=platform\.glueops\.dev/bundle([[:space:]]|$)' hack/render.sh \
+  || ! grep -qE '^BUNDLE_LABEL_VALUE=platform-crds([[:space:]]|$)' hack/render.sh; then
+  fail "hack/render.sh no longer stamps platform.glueops.dev/bundle=platform-crds; the check above and the README selector assume it"
+fi
+
 # 6. package round-trip: helm show crds must yield the UNION, one document per file, and the package must carry
 #    nothing but chart metadata and CRDs (it is passed the platform chart's values file, which holds secrets)
 tmp=$(mktemp -d); helm package . --version 0.0.0-verify -d "$tmp" >/dev/null
@@ -100,4 +111,4 @@ rm -f "$v"; rm -rf "$tmp"
 #    does not fold it — a folded description would make the render-drift check fail on every release PR
 [ "$(yq -r '.description | length' Chart.yaml)" -lt 80 ] || fail "Chart.yaml description must stay under 80 characters (release-please folds longer plain scalars)"
 for p in argo-cd cert-manager external-secrets vpa traefik kube-prometheus-stack keda metacontroller fluent-operator external-dns; do yq -e ".annotations.\"glueops.dev/pin.$p\" | length > 0" Chart.yaml >/dev/null || fail "Chart.yaml missing pin annotation for $p"; done
-echo "✅ verify: $total CRDs ($base_n base + $(echo $profiles | wc -w) profile(s)), complete, disjoint, no forbidden groups, no conversion webhooks and none invocable, package round-trips, profiles mandatory, pins present"
+echo "✅ verify: $total CRDs ($base_n base + $(echo $profiles | wc -w) profile(s)), complete, disjoint, no forbidden groups, no conversion webhooks and none invocable, all labelled, package round-trips, profiles mandatory, pins present"

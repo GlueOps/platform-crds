@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/name: cert-manager
     app.kubernetes.io/version: v1.18.2
+    platform.glueops.dev/bundle: platform-crds
   name: certificates.cert-manager.io
 spec:
   group: cert-manager.io
