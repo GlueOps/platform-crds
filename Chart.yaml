@@ -21,7 +21,7 @@ annotations:
   glueops.dev/pin.external-secrets: "v0.19.2"
   glueops.dev/pin.vpa: "1.6.0"
   glueops.dev/pin.traefik: "v39.0.0"
-  glueops.dev/pin.kube-prometheus-stack: "59.1.0"
+  glueops.dev/pin.kube-prometheus-stack: "64.0.0"
   glueops.dev/pin.keda: "v2.20.1"
   glueops.dev/pin.metacontroller: "v4.12.5"
   glueops.dev/pin.fluent-operator: "2.7.0"
