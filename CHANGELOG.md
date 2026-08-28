@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/GlueOps/platform-crds/compare/v0.1.3...v0.1.4) (2026-08-28)
+
+
+### Bug Fixes
+
+* remove cache warmup as it fails too often ([#64](https://github.com/GlueOps/platform-crds/issues/64)) ([82cad53](https://github.com/GlueOps/platform-crds/commit/82cad538590ab7c278952ec5c0ec71b80dded485))
+
 ## [0.1.3](https://github.com/GlueOps/platform-crds/compare/v0.1.2...v0.1.3) (2026-08-28)
 
 
