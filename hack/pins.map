@@ -1,0 +1,23 @@
+# Upstream repo -> the pin name stamped into Chart.yaml as glueops.dev/pin.<name>.
+#
+# Sourced by BOTH hack/pins.sh (which writes the annotations) and hack/verify.sh (which fails on a repo referenced by
+# a kustomization.yaml that has no entry here). That pairing is the point: adding an upstream source is a two-file
+# change, and forgetting the pin is now an error instead of a silent omission. Before this file existed, verify.sh
+# checked a hardcoded list of pin names, so a new source rendered fine, passed CI, and shipped with no pin — leaving
+# the terraform module's consistency check with no coverage for it.
+#
+# The name is the pin, not the repo: several repos are monorepos whose CRDs come from one chart within them
+# (prometheus-community/helm-charts -> kube-prometheus-stack, fluent/helm-charts -> fluent-operator), and one is
+# named for the component rather than the project (kubernetes/autoscaler -> vpa).
+declare -A PIN_FOR_REPO=(
+  [argoproj/argo-cd]=argo-cd
+  [cert-manager/cert-manager]=cert-manager
+  [external-secrets/external-secrets]=external-secrets
+  [fluent/helm-charts]=fluent-operator
+  [kedacore/keda]=keda
+  [kubernetes/autoscaler]=vpa
+  [kubernetes-sigs/external-dns]=external-dns
+  [metacontroller/metacontroller]=metacontroller
+  [prometheus-community/helm-charts]=kube-prometheus-stack
+  [traefik/traefik-helm-chart]=traefik
+)

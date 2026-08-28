@@ -110,5 +110,13 @@ rm -f "$v"; rm -rf "$tmp"
 # 8. Chart.yaml invariants: pins present; description short enough that release-please's YAML serializer (lineWidth 80)
 #    does not fold it — a folded description would make the render-drift check fail on every release PR
 [ "$(yq -r '.description | length' Chart.yaml)" -lt 80 ] || fail "Chart.yaml description must stay under 80 characters (release-please folds longer plain scalars)"
-for p in argo-cd cert-manager external-secrets vpa traefik kube-prometheus-stack keda metacontroller fluent-operator external-dns; do yq -e ".annotations.\"glueops.dev/pin.$p\" | length > 0" Chart.yaml >/dev/null || fail "Chart.yaml missing pin annotation for $p"; done
-echo "✅ verify: $total CRDs ($base_n base + $(echo $profiles | wc -w) profile(s)), complete, disjoint, no forbidden groups, no conversion webhooks and none invocable, all labelled, package round-trips, profiles mandatory, pins present"
+# Pins are derived from the sources, not from a hardcoded list: every upstream repo a kustomization.yaml references
+# must be mapped in hack/pins.map and must have produced an annotation. A hardcoded list could not fail on a *new*
+# source, which is exactly the case that ships an unpinned dependency the terraform module's check cannot see.
+source hack/pins.map
+for repo in $(grep -oE 'https://(raw\.githubusercontent\.com|github\.com)/[^/]+/[^/ ]+' "$k" | sed -E 's#https://[^/]+/##' | sort -u); do
+  name="${PIN_FOR_REPO[$repo]:-}"
+  [ -n "$name" ] || fail "$repo is referenced by a kustomization.yaml but has no entry in hack/pins.map — add 'owner/repo -> pin name' there and a matching pin line in hack/pins.sh, or the source ships with no glueops.dev/pin.* annotation"
+  yq -e ".annotations.\"glueops.dev/pin.$name\" | length > 0" Chart.yaml >/dev/null || fail "Chart.yaml missing pin annotation for $name ($repo) — run hack/render.sh"
+done
+echo "✅ verify: $total CRDs ($base_n base + $(echo $profiles | wc -w) profile(s)), complete, disjoint, no forbidden groups, no conversion webhooks and none invocable, all labelled, package round-trips, profiles mandatory, every source pinned"
