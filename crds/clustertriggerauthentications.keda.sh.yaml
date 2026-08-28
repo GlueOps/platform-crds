@@ -5,6 +5,8 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.21.0
   name: clustertriggerauthentications.keda.sh
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: keda.sh
   names:

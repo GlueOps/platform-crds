@@ -3,12 +3,25 @@
 # `helm show crds` concatenates a chart's crds/*.yaml WITHOUT inserting separators, so the leading --- is load-bearing.
 # Profiles: the root kustomization.yaml renders the base chart; profiles/<name>/ renders charts/<name>/, a conditional
 # subchart. Sources must be disjoint across profiles — hack/verify.sh fails on a CRD present in more than one.
+#
+# Every CRD is stamped with BUNDLE_LABEL. It is stamped here rather than in kustomization.yaml so that a new profile
+# cannot forget it (verify.sh asserts every rendered CRD carries it). It is what makes the bundle self-describing on a
+# cluster: `kubectl get crd -l platform.glueops.dev/bundle=platform-crds`. Deliberately a NEW, GlueOps-namespaced key
+# and NOT app.kubernetes.io/managed-by — no controller can select on a key that did not exist, whereas taking over
+# managed-by would change a key with an established meaning to fix something cosmetic. Deliberately carries no version
+# either: a value that changed per release would make all 85 CRDs diff on every bump and drown the "N new, M changed"
+# summary the crds step prints. Static value; one write per cluster, a no-op on every run after that.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+BUNDLE_LABEL_KEY=platform.glueops.dev/bundle       # hack/verify.sh pins both of these
+BUNDLE_LABEL_VALUE=platform-crds
+
 render() {   # $1 = kustomize dir, $2 = output crds dir
   rm -rf "$2" && mkdir -p "$2"
-  kubectl kustomize "$1" | yq -s "\"$2/\" + .metadata.name + \".yaml\"" 'select(.kind=="CustomResourceDefinition")'
+  kubectl kustomize "$1" \
+    | yq -s "\"$2/\" + .metadata.name + \".yaml\"" \
+         "select(.kind==\"CustomResourceDefinition\") | .metadata.labels[\"$BUNDLE_LABEL_KEY\"] = \"$BUNDLE_LABEL_VALUE\""
   for f in "$2"/*.yaml; do head -1 "$f" | grep -q '^---$' || sed -i '1i ---' "$f"; done
   echo "  $(ls "$2" | wc -l) CRDs -> $2"
 }

@@ -6,6 +6,8 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.14.0
     operator.prometheus.io/version: 0.74.0
   name: prometheuses.monitoring.coreos.com
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: monitoring.coreos.com
   names:
