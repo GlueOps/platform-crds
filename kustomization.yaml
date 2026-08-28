@@ -14,16 +14,16 @@ resources:
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_traefikservices.yaml
   - https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
   - https://raw.githubusercontent.com/external-secrets/external-secrets/v0.19.2/deploy/crds/bundle.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagerconfigs.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagers.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-podmonitors.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-probes.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusagents.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheuses.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusrules.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-scrapeconfigs.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-thanosrulers.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagerconfigs.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagers.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-podmonitors.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-probes.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusagents.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheuses.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusrules.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-scrapeconfigs.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-68.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-thanosrulers.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/eventing.keda.sh_cloudeventsources.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/eventing.keda.sh_clustercloudeventsources.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/keda.sh_clustertriggerauthentications.yaml
