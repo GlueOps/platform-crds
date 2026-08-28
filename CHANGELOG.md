@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.2](https://github.com/GlueOps/platform-crds/compare/v0.1.1...v0.1.2) (2026-08-28)
+
+
+### Features
+
+* stamp platform.glueops.dev/bundle on every CRD ([#59](https://github.com/GlueOps/platform-crds/issues/59)) ([#61](https://github.com/GlueOps/platform-crds/issues/61)) ([5a46646](https://github.com/GlueOps/platform-crds/commit/5a466467de9688460de1aec3fb3a72437c37d73f))
+
+
+### Documentation
+
+* state what apply-only can and cannot converge, and guard the trigger ([#58](https://github.com/GlueOps/platform-crds/issues/58)) ([df59faf](https://github.com/GlueOps/platform-crds/commit/df59faf144e6486dcb9baadf1099f17fd2b7e034))
+
 ## [0.1.1](https://github.com/GlueOps/platform-crds/compare/v0.1.0...v0.1.1) (2026-08-27)
 
 
