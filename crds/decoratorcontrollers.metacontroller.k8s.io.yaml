@@ -6,6 +6,8 @@ metadata:
     api-approved.kubernetes.io: unapproved, request not yet submitted
     controller-gen.kubebuilder.io/version: v0.18.0
   name: decoratorcontrollers.metacontroller.k8s.io
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: metacontroller.k8s.io
   names:

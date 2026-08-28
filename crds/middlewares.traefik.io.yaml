@@ -5,6 +5,8 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.1
   name: middlewares.traefik.io
+  labels:
+    platform.glueops.dev/bundle: platform-crds
 spec:
   group: traefik.io
   names:

@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: applications.argoproj.io
     app.kubernetes.io/part-of: argocd
+    platform.glueops.dev/bundle: platform-crds
   name: applications.argoproj.io
 spec:
   group: argoproj.io

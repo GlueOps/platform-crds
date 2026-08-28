@@ -68,8 +68,21 @@ captain_utils → glueops-platform
   human removes it (`kubectl get <kind> -A` first — deleting a CRD garbage-collects every object of that kind).
 - **Fix-forward only.** A bundle older than what is live silently shrinks schemas; bump the pin, never roll it back.
 - A removed API version needs a storage migration first — see [MIGRATIONS.md](MIGRATIONS.md).
-- Provenance: every bundle CRD carries `managedFields` manager `glueops-platform-crds` (`kubectl get crd <name>
-  --show-managed-fields`). Orphans = CRDs with that manager that are no longer in the bundle.
+- Provenance: every bundle CRD carries the label `platform.glueops.dev/bundle=platform-crds`, so the bundle's
+  footprint on a cluster is one query:
+
+  ```bash
+  kubectl get crd -l platform.glueops.dev/bundle=platform-crds          # everything this bundle installed
+  kubectl get crd -l '!platform.glueops.dev/bundle'                     # everything else (tenant, cloud, Calico, …)
+  ```
+
+  It is a new, GlueOps-namespaced key on purpose. It is deliberately **not** `app.kubernetes.io/managed-by`: nothing
+  can be selecting on a key that did not exist, whereas taking over `managed-by` would change a key with an
+  established meaning (Helm checks it when adopting a resource) to fix something cosmetic. It carries no version
+  either — a value that changed per release would make all 85 CRDs diff on every bump.
+  Field-manager ownership is the other half: every bundle CRD also carries `managedFields` manager
+  `glueops-platform-crds` (`kubectl get crd <name> --show-managed-fields`). Orphans = CRDs with that manager, or that
+  label, that are no longer in the bundle.
 - **The bundle converges exactly what it declares — nothing more.** captain_utils applies and does nothing else
   (`kubectl replace` was removed: it erased `metadata.finalizers`, destroying terminating CRDs). Server-side apply
   cannot remove a field the applying manager does not set, so:
