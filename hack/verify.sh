@@ -53,6 +53,24 @@ for d in $(crd_dirs); do for f in "$d"/*.yaml; do
   [ "$(yq -N '.spec.conversion.strategy // "None"' "$f")" = "None" ] || fail "$f declares a conversion webhook: an orphan CRD with a webhook is not inert — exclude it, pin below it, or ship it with its operator"
 done; done
 
+# 5b. …and the trigger for the ones we did NOT ship. Conversion is only invoked when a CRD serves more than one
+#     version, which is why a stale spec.conversion webhook left on a cluster by an older installer is harmless today.
+#     captain_utils applies and nothing else, and server-side apply cannot remove a field the bundle does not set, so
+#     those leftovers are permanent: the day a source starts serving a second version, they go live and every read at
+#     the non-storage version fails against a Service that no longer exists. Fail here so that arrives as a decision at
+#     bump time, in this repo, rather than as a broken read on a cluster months later.
+#     To acknowledge one: audit the fleet for a stale webhook on that type
+#       kubectl get crd <name> -o jsonpath='{.spec.conversion.strategy}{"\n"}'     # must be None everywhere
+#     clear any that are not (`kubectl patch crd <name> --type=merge -p '{"spec":{"conversion":{"strategy":"None"}}}'`),
+#     record it in MIGRATIONS.md, and add the CRD name here.
+multi_version_ok=""   # empty on purpose: no CRD in the bundle serves more than one version today
+for d in $(crd_dirs); do for f in "$d"/*.yaml; do
+  name=$(basename "$f" .yaml)
+  case " $multi_version_ok " in *" $name "*) continue ;; esac
+  n=$(yq -N '[.spec.versions[] | select(.served == true)] | length' "$f")
+  [ "$n" -le 1 ] || fail "$f now serves $n versions: conversion becomes live for this type, so any stale spec.conversion webhook a previous installer left on a cluster starts failing reads — and the bundle cannot remove it. Audit the fleet, then add '$name' to multi_version_ok in $0 and note it in MIGRATIONS.md"
+done; done
+
 # 6. package round-trip: helm show crds must yield the UNION, one document per file, and the package must carry
 #    nothing but chart metadata and CRDs (it is passed the platform chart's values file, which holds secrets)
 tmp=$(mktemp -d); helm package . --version 0.0.0-verify -d "$tmp" >/dev/null
@@ -82,4 +100,4 @@ rm -f "$v"; rm -rf "$tmp"
 #    does not fold it — a folded description would make the render-drift check fail on every release PR
 [ "$(yq -r '.description | length' Chart.yaml)" -lt 80 ] || fail "Chart.yaml description must stay under 80 characters (release-please folds longer plain scalars)"
 for p in argo-cd cert-manager external-secrets vpa traefik kube-prometheus-stack keda metacontroller fluent-operator external-dns; do yq -e ".annotations.\"glueops.dev/pin.$p\" | length > 0" Chart.yaml >/dev/null || fail "Chart.yaml missing pin annotation for $p"; done
-echo "✅ verify: $total CRDs ($base_n base + $(echo $profiles | wc -w) profile(s)), complete, disjoint, no forbidden groups, no conversion webhooks, package round-trips, profiles mandatory, pins present"
+echo "✅ verify: $total CRDs ($base_n base + $(echo $profiles | wc -w) profile(s)), complete, disjoint, no forbidden groups, no conversion webhooks and none invocable, package round-trips, profiles mandatory, pins present"

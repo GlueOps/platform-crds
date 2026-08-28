@@ -70,9 +70,29 @@ captain_utils → glueops-platform
 - A removed API version needs a storage migration first — see [MIGRATIONS.md](MIGRATIONS.md).
 - Provenance: every bundle CRD carries `managedFields` manager `glueops-platform-crds` (`kubectl get crd <name>
   --show-managed-fields`). Orphans = CRDs with that manager that are no longer in the bundle.
-- Legacy co-owners: CRDs that ArgoCD once synced with ServerSideApply keep an `argocd-controller/Apply` entry; to
-  *remove* a field from those, reset ownership once (`kubectl patch crd <name> --type=merge -p
-  '{"metadata":{"managedFields":[{}]}}'`) and re-run `crds`.
+- **The bundle converges exactly what it declares — nothing more.** captain_utils applies and does nothing else
+  (`kubectl replace` was removed: it erased `metadata.finalizers`, destroying terminating CRDs). Server-side apply
+  cannot remove a field the applying manager does not set, so:
+
+  | the bundle… | on a cluster where another installer set it |
+  |---|---|
+  | declares the key | our manager takes it over on the next apply — the old value is overwritten |
+  | later drops a key it used to declare | removed cleanly, because we owned it |
+  | never declares the key | **frozen: no bundle release can ever remove it** |
+
+  So what upstream happens to stamp on a CRD decides what we can converge. 54 of 85 CRDs here ship no labels at all;
+  a cluster migrated from the old per-Application installs therefore keeps `app.kubernetes.io/managed-by: Helm` and
+  `helm.sh/chart` on the CRDs whose upstream copy has no labels (measured: 8 of 83 on a real cluster — 6 KEDA, which
+  is sourced from `config/crd/bases/`, plus 2 cert-manager). These are inert: nothing reads them, the set does not
+  grow, and `kubectl diff` stays clean because we never apply them.
+
+  Do **not** try to clear them by resetting ownership. `kubectl patch crd <name> --type=merge -p
+  '{"metadata":{"managedFields":[{}]}}'` followed by a re-run does not work — verified: it makes the field *unowned*,
+  not absent, and the next apply still does not set it, so the labels survive unchanged. It also releases claims that
+  are live rather than stale. To remove one anyway, delete the key directly: `kubectl label crd <name> <key>-`.
+- Flipping a profile off does not remove its CRDs. A cluster that goes `kubeadm: true → false` keeps the VPA CRDs,
+  still owned by `glueops-platform-crds` but no longer in the bundle — the "orphans" case above, reached without any
+  upstream change. Remove them by hand if you want them gone, after checking for live objects.
 
 ## Not in the bundle (by design)
 
