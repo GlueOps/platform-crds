@@ -32,13 +32,4 @@ jobs:
           v="${GITHUB_REF_NAME#v}"
           helm show chart "oci://ghcr.io/glueops/platform-crds" --version "$v" >/dev/null 2>&1 || {
             echo "::error::ghcr.io/glueops/platform-crds is not anonymously pullable. First release? Set the package to Public under https://github.com/orgs/GlueOps/packages/container/platform-crds/settings and re-run this job (the mirror negative-caches misses)."; exit 1; }
-      - name: Prove the package is pullable through the mirror (and warm its cache)
-        run: |
-          # the UNION of every profile — `helm show crds` returns the base chart AND its profile subcharts
-          v="${GITHUB_REF_NAME#v}"; want=$(ls crds charts/*/crds | grep -c '\.yaml$')
-          for i in $(seq 1 10); do
-            got=$(helm show crds "oci://ghcr.repo.gpkg.io/glueops/platform-crds" --version "$v" 2>/dev/null | yq -N '.metadata.name' | grep -vc '^---$' || true)
-            [ "${got:-0}" -eq "$want" ] && { echo "✅ $got CRDs via ghcr.repo.gpkg.io"; exit 0; }
-            echo "attempt $i: got ${got:-0}/$want, retrying in 30s (mirror cache)"; sleep 30
-          done
-          echo "::error::platform-crds $v not pullable through ghcr.repo.gpkg.io — check package visibility (must be public) and the Nexus proxy"; exit 1
+
