@@ -127,6 +127,22 @@ captain_utils → glueops-platform
   still owned by `glueops-platform-crds` but no longer in the bundle — the "orphans" case above, reached without any
   upstream change. Remove them by hand if you want them gone, after checking for live objects.
 
+## Upstream shapes the bundle had to adjust
+
+- **OpenTelemetryCollector serves only `v1beta1`.** Upstream serves `v1alpha1` *and* `v1beta1` and depends on the
+  operator's conversion webhook to translate between them. A conversion webhook cannot live in this bundle (an orphan
+  CRD with one is not inert — `hack/verify.sh` check 5), so `kustomization.yaml` patches `v1alpha1` to `served: false`.
+  With a single served version no conversion is ever invoked, `strategy: None` is correct, and `status.storedVersions`
+  stays `[v1beta1]`. Everything the platform deploys is `v1beta1` (`GlueOps/otel-resources-helm`); a `v1alpha1`
+  collector is rejected by the API server instead of being silently mis-converted. `Instrumentation`, `OpAMPBridge`
+  and `TargetAllocator` are single-version upstream and ship unmodified. The operator chart in
+  `GlueOps/k8s-monitoring-helm` runs with `crds.create: false`, and its pin must track this bundle's
+  `glueops.dev/pin.opentelemetry-operator` (the chart's `appVersion`), since a CRD older than the operator that serves
+  it rejects fields the operator writes.
+- The CRDs are sourced from the operator repo (`config/crd/bases/`) rather than the Helm chart's `conf/crds/`: the
+  chart's copies are Go templates (they carry the webhook `caBundle`), not YAML kustomize can read.
+  `ClusterObservability` is alpha, feature-gated and not shipped by the chart, so it is excluded in `hack/verify.sh`.
+
 ## Not in the bundle (by design)
 
 - Calico / Tigera operator CRDs — installed by the `calico` Helm release (EKS) or GlueKube; the operator manages them.

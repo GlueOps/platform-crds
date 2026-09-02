@@ -23,7 +23,11 @@ for p in $profiles; do check_render "profiles/$p" "charts/$p/crds"; done
 for d in $(crd_dirs); do for f in "$d"/*.yaml; do head -1 "$f" | grep -q '^---$' || fail "$f must start with ---"; done; done
 
 # 2. completeness of the per-file directory sources: every *.yaml upstream must be referenced or explicitly excluded
-declare -A EXCLUDE=( ["traefik/traefik-helm-chart:traefik/crds"]='^(kustomization\.yaml|gateway-standard-install\.yaml|hub\.traefik\.io_.*\.yaml)$' )
+declare -A EXCLUDE=(
+  ["traefik/traefik-helm-chart:traefik/crds"]='^(kustomization\.yaml|gateway-standard-install\.yaml|hub\.traefik\.io_.*\.yaml)$'
+  # ClusterObservability is alpha and feature-gated; the opentelemetry-operator Helm chart does not ship it (conf/crds/)
+  ["open-telemetry/opentelemetry-operator:config/crd/bases"]='^opentelemetry\.io_clusterobservabilities\.yaml$'
+)
 api() { if command -v gh >/dev/null; then gh api "$1"; else curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} "https://api.github.com/$1"; fi; }
 grep -oE 'https://raw\.githubusercontent\.com/[^ ]+' "$k" | sed -E 's#https://raw.githubusercontent.com/([^/]+/[^/]+)/([^/]+)/(.*)/[^/]+$#\1 \2 \3#' | sort -u | while read -r repo ref dir; do
   [ -n "$dir" ] || continue

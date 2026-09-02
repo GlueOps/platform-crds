@@ -18,6 +18,7 @@ declare -A PIN_FOR_REPO=(
   [kubernetes/autoscaler]=vpa
   [kubernetes-sigs/external-dns]=external-dns
   [metacontroller/metacontroller]=metacontroller
+  [open-telemetry/opentelemetry-operator]=opentelemetry-operator
   [prometheus-community/helm-charts]=kube-prometheus-stack
   [traefik/traefik-helm-chart]=traefik
 )
