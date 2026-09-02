@@ -143,7 +143,27 @@ captain_utils → glueops-platform
   chart's copies are Go templates (they carry the webhook `caBundle`), not YAML kustomize can read.
   `ClusterObservability` is alpha, feature-gated and not shipped by the chart, so it is excluded in `hack/verify.sh`.
 
-## Not in the bundle (by design)
+## Taking over CRDs an Argo CD Application used to install
+
+A cluster whose CRDs were previously rendered by an Argo CD Application (the pre-#347 `GlueOps/k8s-monitoring-helm`
+umbrella installed the kube-prometheus-stack CRDs from a git `directory` source and the OpenTelemetry CRDs from the
+operator chart) has them **tracked** by that Application (`argocd.argoproj.io/tracking-id` + instance label). When the
+Application stops declaring them Argo CD would prune them, and when it is deleted its `resources-finalizer` would
+cascade-delete them — and deleting a CRD deletes every object of that kind. Two things prevent that:
+
+- every bundle CRD carries `argocd.argoproj.io/sync-options: Prune=false,Delete=false` (stamped by `hack/render.sh`,
+  owned by the bundle's field manager). Argo CD honours it on the live object, so no Application can prune or
+  cascade-delete a bundle CRD, whoever tracks it;
+- `captain_utils → crds` strips the Argo CD tracking annotation and instance label from the CRDs it applies, so the old
+  Application stops showing them as OutOfSync ("requires pruning").
+
+Run `crds` **before** upgrading the platform chart / the app-of-apps. Stripping alone is a race (the old Application's
+self-heal re-adopts an untracked CRD until its desired state changes); the annotation is what makes the outcome safe.
+
+The operator chart's copy of `opentelemetrycollectors.opentelemetry.io` also carried a conversion webhook; the bundle
+never declares `spec.conversion`, so server-side apply leaves that stanza in place. It is inert while only one version
+is served, but clear it anyway (see `hack/verify.sh` check 5b for the exact `kubectl patch`).
+
 
 - Calico / Tigera operator CRDs — installed by the `calico` Helm release (EKS) or GlueKube; the operator manages them.
 - Cloud-provider CRDs (EKS VPC-CNI `vpcresources.k8s.aws`, …).

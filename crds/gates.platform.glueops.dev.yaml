@@ -5,6 +5,8 @@ metadata:
   name: gates.platform.glueops.dev
   labels:
     platform.glueops.dev/bundle: platform-crds
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
 spec:
   group: platform.glueops.dev
   names:

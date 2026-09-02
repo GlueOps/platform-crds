@@ -5,6 +5,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.20.1
     operator.prometheus.io/version: 0.91.0
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
   name: podmonitors.monitoring.coreos.com
   labels:
     platform.glueops.dev/bundle: platform-crds

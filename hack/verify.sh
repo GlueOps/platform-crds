@@ -65,7 +65,8 @@ done; done
 #     bump time, in this repo, rather than as a broken read on a cluster months later.
 #     To acknowledge one: audit the fleet for a stale webhook on that type
 #       kubectl get crd <name> -o jsonpath='{.spec.conversion.strategy}{"\n"}'     # must be None everywhere
-#     clear any that are not (`kubectl patch crd <name> --type=merge -p '{"spec":{"conversion":{"strategy":"None"}}}'`),
+#     clear any that are not (`kubectl patch crd <name> --type=merge -p '{"spec":{"conversion":{"strategy":"None","webhook":null}}}'`
+#     — the API server rejects strategy None while a webhook stanza is still present),
 #     record it in MIGRATIONS.md, and add the CRD name here.
 multi_version_ok=""   # empty on purpose: no CRD in the bundle serves more than one version today
 for d in $(crd_dirs); do for f in "$d"/*.yaml; do
@@ -85,6 +86,12 @@ if ! grep -qE '^BUNDLE_LABEL_KEY=platform\.glueops\.dev/bundle([[:space:]]|$)' h
   || ! grep -qE '^BUNDLE_LABEL_VALUE=platform-crds([[:space:]]|$)' hack/render.sh; then
   fail "hack/render.sh no longer stamps platform.glueops.dev/bundle=platform-crds; the check above and the README selector assume it"
 fi
+# 5d. every CRD tells Argo CD never to prune or cascade-delete it. An Application that tracked a CRD before the bundle
+#     took it over would otherwise garbage-collect every object of that kind the moment the CRD left its desired state.
+for d in $(crd_dirs); do for f in "$d"/*.yaml; do
+  [ "$(yq -N '.metadata.annotations["argocd.argoproj.io/sync-options"] // ""' "$f")" = "Prune=false,Delete=false" ] || fail "$f is missing annotation argocd.argoproj.io/sync-options=Prune=false,Delete=false — run hack/render.sh"
+done; done
+grep -qE '^ARGO_SYNC_OPTIONS_VALUE=Prune=false,Delete=false([[:space:]]|$)' hack/render.sh || fail "hack/render.sh no longer stamps argocd.argoproj.io/sync-options=Prune=false,Delete=false"
 
 # 6. package round-trip: helm show crds must yield the UNION, one document per file, and the package must carry
 #    nothing but chart metadata and CRDs (it is passed the platform chart's values file, which holds secrets)
