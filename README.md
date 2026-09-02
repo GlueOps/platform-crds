@@ -113,6 +113,12 @@ captain_utils → glueops-platform
   | later drops a key it used to declare | removed cleanly, because we owned it |
   | never declares the key | **frozen: no bundle release can ever remove it** |
 
+  One exception, measured: a CRD that an earlier installer created with **client-side** `kubectl apply` (Argo CD's
+  default path, which leaves a `last-applied-configuration` annotation) is migrated wholesale by kubectl's CSA→SSA
+  upgrade on the bundle's first apply — every field that manager owned moves to `glueops-platform-crds`, so foreign
+  labels, annotations and even a `spec.conversion` webhook stanza are removed. A CRD created any other way
+  (`helm install`, Argo CD `Replace=true` or server-side apply, `kubectl create`) keeps them, as the table says.
+
   So what upstream happens to stamp on a CRD decides what we can converge. 54 of 85 CRDs here ship no labels at all;
   a cluster migrated from the old per-Application installs therefore keeps `app.kubernetes.io/managed-by: Helm` and
   `helm.sh/chart` on the CRDs whose upstream copy has no labels (measured: 8 of 83 on a real cluster — 6 KEDA, which
@@ -136,9 +142,14 @@ captain_utils → glueops-platform
   stays `[v1beta1]`. Everything the platform deploys is `v1beta1` (`GlueOps/otel-resources-helm`); a `v1alpha1`
   collector is rejected by the API server instead of being silently mis-converted. `Instrumentation`, `OpAMPBridge`
   and `TargetAllocator` are single-version upstream and ship unmodified. The operator chart in
-  `GlueOps/k8s-monitoring-helm` runs with `crds.create: false`, and its pin must track this bundle's
-  `glueops.dev/pin.opentelemetry-operator` (the chart's `appVersion`), since a CRD older than the operator that serves
-  it rejects fields the operator writes.
+  `GlueOps/k8s-monitoring-helm` runs with `crds.create: false`; the operator image it runs (`otel.manager.image.tag`)
+  must not get ahead of this bundle's `glueops.dev/pin.opentelemetry-operator`, since a CRD older than the operator
+  that serves it rejects fields the operator writes. Like every `glueops.dev/pin.*` annotation this is informational —
+  nothing in CI compares it yet.
+  On a cluster where the operator chart installed this CRD before the bundle took it over, the chart's conversion
+  webhook stanza may survive the takeover (see the note under *How it works*). It is inert while only `v1beta1` is
+  served, but a stored `v1alpha1` object would make every read of that type fail and block deleting the CRD, so audit
+  and clear it — see [MIGRATIONS.md](MIGRATIONS.md).
 - The CRDs are sourced from the operator repo (`config/crd/bases/`) rather than the Helm chart's `conf/crds/`: the
   chart's copies are Go templates (they carry the webhook `caBundle`), not YAML kustomize can read.
   `ClusterObservability` is alpha, feature-gated and not shipped by the chart, so it is excluded in `hack/verify.sh`.

@@ -25,11 +25,16 @@ ARGO_SYNC_OPTIONS_KEY=argocd.argoproj.io/sync-options
 ARGO_SYNC_OPTIONS_VALUE=Prune=false,Delete=false
 
 render() {   # $1 = kustomize dir, $2 = output crds dir
-  rm -rf "$2" && mkdir -p "$2"
-  kubectl kustomize "$1" \
-    | yq -s "\"$2/\" + .metadata.name + \".yaml\"" \
-         "select(.kind==\"CustomResourceDefinition\") | .metadata.labels[\"$BUNDLE_LABEL_KEY\"] = \"$BUNDLE_LABEL_VALUE\" | .metadata.annotations[\"$ARGO_SYNC_OPTIONS_KEY\"] = \"$ARGO_SYNC_OPTIONS_VALUE\""
-  for f in "$2"/*.yaml; do head -1 "$f" | grep -q '^---$' || sed -i '1i ---' "$f"; done
+  # Render into a scratch dir and swap it in only on success: a remote source timing out (kustomize gives a git
+  # fetch ~27s) used to leave $2 wiped, which CI then reported as drift instead of a network error.
+  local tmp; tmp=$(mktemp -d "$2.render.XXXXXX")
+  if ! kubectl kustomize "$1" \
+    | yq -s "\"$tmp/\" + .metadata.name + \".yaml\"" \
+         "select(.kind==\"CustomResourceDefinition\") | .metadata.labels[\"$BUNDLE_LABEL_KEY\"] = \"$BUNDLE_LABEL_VALUE\" | .metadata.annotations[\"$ARGO_SYNC_OPTIONS_KEY\"] = \"$ARGO_SYNC_OPTIONS_VALUE\""; then
+    rm -rf "$tmp"; echo "render.sh: rendering $1 failed; $2 left untouched" >&2; return 1
+  fi
+  for f in "$tmp"/*.yaml; do head -1 "$f" | grep -q '^---$' || sed -i '1i ---' "$f"; done
+  rm -rf "$2" && mv "$tmp" "$2"
   echo "  $(ls "$2" | wc -l) CRDs -> $2"
 }
 
