@@ -4,6 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.1
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
   name: middlewaretcps.traefik.io
   labels:
     platform.glueops.dev/bundle: platform-crds

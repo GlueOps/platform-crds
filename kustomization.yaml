@@ -14,16 +14,23 @@ resources:
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_traefikservices.yaml
   - https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
   - https://raw.githubusercontent.com/external-secrets/external-secrets/v0.19.2/deploy/crds/bundle.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagerconfigs.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagers.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-podmonitors.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-probes.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusagents.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheuses.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusrules.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-scrapeconfigs.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
-  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-thanosrulers.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagerconfigs.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagers.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-podmonitors.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-probes.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusagents.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheuses.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-prometheusrules.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-scrapeconfigs.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
+  - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-86.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-thanosrulers.yaml
+  # opentelemetry-operator: the 4 CRDs the opentelemetry-operator Helm chart installs (its templated conf/crds/). Sourced from
+  # the operator repo at the tag the chart's appVersion points to, because the chart's copies are Helm templates, not YAML.
+  # clusterobservabilities (alpha, feature-gated) is not shipped by the chart and is excluded in hack/verify.sh.
+  - https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v0.152.0/config/crd/bases/opentelemetry.io_instrumentations.yaml
+  - https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v0.152.0/config/crd/bases/opentelemetry.io_opampbridges.yaml
+  - https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v0.152.0/config/crd/bases/opentelemetry.io_opentelemetrycollectors.yaml
+  - https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v0.152.0/config/crd/bases/opentelemetry.io_targetallocators.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/eventing.keda.sh_cloudeventsources.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/eventing.keda.sh_clustercloudeventsources.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/keda.sh_clustertriggerauthentications.yaml
@@ -53,3 +60,24 @@ resources:
   - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_outputs.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/external-dns-helm-chart-1.20.0/charts/external-dns/crds/dnsendpoints.externaldns.k8s.io.yaml
   - glueops
+
+patches:
+  # OpenTelemetryCollector upstream serves v1alpha1 AND v1beta1 and relies on the operator's conversion webhook to
+  # translate between them. The bundle cannot carry a conversion webhook (an orphan CRD with one is not inert — see
+  # hack/verify.sh check 5), so only the storage version v1beta1 is served: with a single served version no conversion
+  # is ever invoked and strategy None is correct. Everything the platform deploys is v1beta1 (otel-resources-helm);
+  # v1alpha1 collectors are rejected by the API server instead of being silently mis-converted. The operator itself
+  # reconciles v1beta1 and does not need v1alpha1 to be served. The `test` op fails the render if upstream reorders
+  # spec.versions, so the index can never silently point at the wrong version.
+  - target:
+      group: apiextensions.k8s.io
+      version: v1
+      kind: CustomResourceDefinition
+      name: opentelemetrycollectors.opentelemetry.io
+    patch: |-
+      - op: test
+        path: /spec/versions/0/name
+        value: v1alpha1
+      - op: replace
+        path: /spec/versions/0/served
+        value: false

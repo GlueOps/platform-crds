@@ -113,6 +113,12 @@ captain_utils → glueops-platform
   | later drops a key it used to declare | removed cleanly, because we owned it |
   | never declares the key | **frozen: no bundle release can ever remove it** |
 
+  One exception, measured: a CRD that an earlier installer created with **client-side** `kubectl apply` (Argo CD's
+  default path, which leaves a `last-applied-configuration` annotation) is migrated wholesale by kubectl's CSA→SSA
+  upgrade on the bundle's first apply — every field that manager owned moves to `glueops-platform-crds`, so foreign
+  labels, annotations and even a `spec.conversion` webhook stanza are removed. A CRD created any other way
+  (`helm install`, Argo CD `Replace=true` or server-side apply, `kubectl create`) keeps them, as the table says.
+
   So what upstream happens to stamp on a CRD decides what we can converge. 54 of 85 CRDs here ship no labels at all;
   a cluster migrated from the old per-Application installs therefore keeps `app.kubernetes.io/managed-by: Helm` and
   `helm.sh/chart` on the CRDs whose upstream copy has no labels (measured: 8 of 83 on a real cluster — 6 KEDA, which
@@ -127,7 +133,48 @@ captain_utils → glueops-platform
   still owned by `glueops-platform-crds` but no longer in the bundle — the "orphans" case above, reached without any
   upstream change. Remove them by hand if you want them gone, after checking for live objects.
 
-## Not in the bundle (by design)
+## Upstream shapes the bundle had to adjust
+
+- **OpenTelemetryCollector serves only `v1beta1`.** Upstream serves `v1alpha1` *and* `v1beta1` and depends on the
+  operator's conversion webhook to translate between them. A conversion webhook cannot live in this bundle (an orphan
+  CRD with one is not inert — `hack/verify.sh` check 5), so `kustomization.yaml` patches `v1alpha1` to `served: false`.
+  With a single served version no conversion is ever invoked, `strategy: None` is correct, and `status.storedVersions`
+  stays `[v1beta1]`. Everything the platform deploys is `v1beta1` (`GlueOps/otel-resources-helm`); a `v1alpha1`
+  collector is rejected by the API server instead of being silently mis-converted. `Instrumentation`, `OpAMPBridge`
+  and `TargetAllocator` are single-version upstream and ship unmodified. The operator chart in
+  `GlueOps/k8s-monitoring-helm` runs with `crds.create: false`; the operator image it runs (`otel.manager.image.tag`)
+  must not get ahead of this bundle's `glueops.dev/pin.opentelemetry-operator`, since a CRD older than the operator
+  that serves it rejects fields the operator writes. Like every `glueops.dev/pin.*` annotation this is informational —
+  nothing in CI compares it yet.
+  On a cluster where the operator chart installed this CRD before the bundle took it over, the chart's conversion
+  webhook stanza may survive the takeover (see the note under *How it works*). It is inert while only `v1beta1` is
+  served, but a stored `v1alpha1` object would make every read of that type fail and block deleting the CRD, so audit
+  and clear it — see [MIGRATIONS.md](MIGRATIONS.md).
+- The CRDs are sourced from the operator repo (`config/crd/bases/`) rather than the Helm chart's `conf/crds/`: the
+  chart's copies are Go templates (they carry the webhook `caBundle`), not YAML kustomize can read.
+  `ClusterObservability` is alpha, feature-gated and not shipped by the chart, so it is excluded in `hack/verify.sh`.
+
+## Taking over CRDs an Argo CD Application used to install
+
+A cluster whose CRDs were previously rendered by an Argo CD Application (the pre-#347 `GlueOps/k8s-monitoring-helm`
+umbrella installed the kube-prometheus-stack CRDs from a git `directory` source and the OpenTelemetry CRDs from the
+operator chart) has them **tracked** by that Application (`argocd.argoproj.io/tracking-id` + instance label). When the
+Application stops declaring them Argo CD would prune them, and when it is deleted its `resources-finalizer` would
+cascade-delete them — and deleting a CRD deletes every object of that kind. Two things prevent that:
+
+- every bundle CRD carries `argocd.argoproj.io/sync-options: Prune=false,Delete=false` (stamped by `hack/render.sh`,
+  owned by the bundle's field manager). Argo CD honours it on the live object, so no Application can prune or
+  cascade-delete a bundle CRD, whoever tracks it;
+- `captain_utils → crds` strips the Argo CD tracking annotation and instance label from the CRDs it applies, so the old
+  Application stops showing them as OutOfSync ("requires pruning").
+
+Run `crds` **before** upgrading the platform chart / the app-of-apps. Stripping alone is a race (the old Application's
+self-heal re-adopts an untracked CRD until its desired state changes); the annotation is what makes the outcome safe.
+
+The operator chart's copy of `opentelemetrycollectors.opentelemetry.io` also carried a conversion webhook; the bundle
+never declares `spec.conversion`, so server-side apply leaves that stanza in place. It is inert while only one version
+is served, but clear it anyway (see `hack/verify.sh` check 5b for the exact `kubectl patch`).
+
 
 - Calico / Tigera operator CRDs — installed by the `calico` Helm release (EKS) or GlueKube; the operator manages them.
 - Cloud-provider CRDs (EKS VPC-CNI `vpcresources.k8s.aws`, …).
