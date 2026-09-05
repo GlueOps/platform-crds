@@ -23,6 +23,6 @@ annotations:
   glueops.dev/pin.traefik: "v39.0.0"
   glueops.dev/pin.kube-prometheus-stack: "59.1.0"
   glueops.dev/pin.keda: "v2.20.1"
-  glueops.dev/pin.metacontroller: "v4.12.5"
+  glueops.dev/pin.metacontroller: "v4.16.7"
   glueops.dev/pin.fluent-operator: "2.7.0"
   glueops.dev/pin.external-dns: "1.20.0"
