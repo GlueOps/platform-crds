@@ -16,7 +16,7 @@ home: https://github.com/GlueOps/platform-crds
 sources:
   - https://github.com/GlueOps/platform-crds
 annotations:
-  glueops.dev/pin.argo-cd: "v3.2.12"
+  glueops.dev/pin.argo-cd: "v3.5.0"
   glueops.dev/pin.cert-manager: "v1.18.2"
   glueops.dev/pin.external-secrets: "v0.19.2"
   glueops.dev/pin.vpa: "1.6.0"
