@@ -2,16 +2,16 @@
 resources:
   - https://github.com/argoproj/argo-cd/manifests/crds?ref=v3.2.12
   # traefik: ONLY the 10 traefik.io CRDs (= what prod installs today); hub.traefik.io and Gateway API are excluded on purpose
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_ingressroutes.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_ingressroutetcps.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_ingressrouteudps.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_middlewares.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_middlewaretcps.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_serverstransports.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_serverstransporttcps.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_tlsoptions.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_tlsstores.yaml
-  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_traefikservices.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_ingressroutes.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_ingressroutetcps.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_ingressrouteudps.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_middlewares.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_middlewaretcps.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_serverstransports.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_serverstransporttcps.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_tlsoptions.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_tlsstores.yaml
+  - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v40.3.0/traefik/crds/traefik.io_traefikservices.yaml
   - https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
   - https://raw.githubusercontent.com/external-secrets/external-secrets/v0.19.2/deploy/crds/bundle.yaml
   - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagerconfigs.yaml
