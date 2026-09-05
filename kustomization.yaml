@@ -1,6 +1,6 @@
 # platform-crds — the ONLY hand-edited manifest. Add a source = add a line; bump a version = edit the ref/URL. `hack/render.sh` regenerates crds/ and the pins in Chart.yaml.
 resources:
-  - https://github.com/argoproj/argo-cd/manifests/crds?ref=v3.2.12
+  - https://github.com/argoproj/argo-cd/manifests/crds?ref=v3.5.0
   # traefik: ONLY the 10 traefik.io CRDs (= what prod installs today); hub.traefik.io and Gateway API are excluded on purpose
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_ingressroutes.yaml
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_ingressroutetcps.yaml
