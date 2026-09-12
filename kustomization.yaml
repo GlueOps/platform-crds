@@ -31,25 +31,25 @@ resources:
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/keda.sh_scaledobjects.yaml
   - https://raw.githubusercontent.com/kedacore/keda/v2.20.1/config/crd/bases/keda.sh_triggerauthentications.yaml
   - https://raw.githubusercontent.com/metacontroller/metacontroller/v4.12.5/deploy/helm/metacontroller/crds/metacontroller-crds-v1.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterfilters.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterfluentbitconfigs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterinputs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusteroutputs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterparsers.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_collectors.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_filters.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_fluentbitconfigs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_fluentbits.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_outputs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_parsers.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusterfilters.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusterfluentdconfigs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusterinputs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusteroutputs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_filters.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_fluentdconfigs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_fluentds.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_inputs.yaml
-  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_outputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterfilters.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterfluentbitconfigs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterinputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusteroutputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_clusterparsers.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_collectors.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_filters.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_fluentbitconfigs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_fluentbits.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_outputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluent-bit-crds/crds/fluentbit.fluent.io_parsers.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusterfilters.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusterfluentdconfigs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusterinputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_clusteroutputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_filters.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_fluentdconfigs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_fluentds.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_inputs.yaml
+  - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-4.2.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_outputs.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/external-dns-helm-chart-1.20.0/charts/external-dns/crds/dnsendpoints.externaldns.k8s.io.yaml
   - glueops
