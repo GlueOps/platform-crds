@@ -12,7 +12,7 @@ resources:
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_tlsoptions.yaml
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_tlsstores.yaml
   - https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.0/traefik/crds/traefik.io_traefikservices.yaml
-  - https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
+  - https://github.com/cert-manager/cert-manager/releases/download/v1.21.1/cert-manager.crds.yaml
   - https://raw.githubusercontent.com/external-secrets/external-secrets/v0.19.2/deploy/crds/bundle.yaml
   - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagerconfigs.yaml
   - https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-59.1.0/charts/kube-prometheus-stack/charts/crds/crds/crd-alertmanagers.yaml
