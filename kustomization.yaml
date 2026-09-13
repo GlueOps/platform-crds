@@ -51,5 +51,5 @@ resources:
   - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_fluentds.yaml
   - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_inputs.yaml
   - https://raw.githubusercontent.com/fluent/helm-charts/fluent-operator-2.7.0/charts/fluent-operator/charts/fluentd-crds/crds/fluentd.fluent.io_outputs.yaml
-  - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/external-dns-helm-chart-1.20.0/charts/external-dns/crds/dnsendpoints.externaldns.k8s.io.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/external-dns/external-dns-helm-chart-1.21.1/charts/external-dns/crds/dnsendpoints.externaldns.k8s.io.yaml
   - glueops
