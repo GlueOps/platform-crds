@@ -307,7 +307,28 @@ spec:
                   properties:
                     apikey:
                       description: Your Datadog API key.
-                      type: string
+                      properties:
+                        valueFrom:
+                          description: ValueSource defines how to find a value's key.
+                          properties:
+                            secretKeyRef:
+                              description: Selects a key of a secret in the pod's namespace
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must be a valid secret key.
+                                  type: string
+                                name:
+                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                      type: object
                     compress:
                       description: Compress  the payload in GZIP format. Datadog supports and recommends setting this to gzip.
                       type: string
@@ -542,6 +563,9 @@ spec:
                           description: Hostname to be used for TLS SNI extension
                           type: string
                       type: object
+                    totalLimitSize:
+                      description: Limit the maximum number of Chunks in the filesystem for the current output logical destination.
+                      type: string
                     traceError:
                       description: When enabled print the elasticsearch API calls to stdout when elasticsearch returns an error
                       type: boolean
@@ -550,6 +574,9 @@ spec:
                       type: boolean
                     type:
                       description: Type name
+                      type: string
+                    writeOperation:
+                      description: Operation to use to write in bulk requests.
                       type: string
                   type: object
                 file:
@@ -667,6 +694,9 @@ spec:
                       type: boolean
                     sharedKey:
                       description: A key string known by the remote Fluentd used for authorization.
+                      type: string
+                    tag:
+                      description: Overwrite the tag as we transmit. This allows the receiving pipeline start fresh, or to attribute source.
                       type: string
                     timeAsInteger:
                       description: Set timestamps in integer format, it enable compatibility mode for Fluentd v0.12 series.
@@ -2014,6 +2044,9 @@ spec:
                     PreserveDataOrdering:
                       description: Normally, when an upload request fails, there is a high chance for the last received chunk to be swapped with a later chunk, resulting in data shuffling. This feature prevents this shuffling by using a queue logic for uploads.
                       type: boolean
+                    Profile:
+                      description: Option to specify an AWS Profile for credentials.
+                      type: string
                     Region:
                       description: The AWS region of your S3 bucket
                       type: string
@@ -2060,6 +2093,62 @@ spec:
                     UsePutObject:
                       description: Use the S3 PutObject API, instead of the multipart upload API.
                       type: boolean
+                    tls:
+                      description: Fluent Bit provides integrated support for Transport Layer Security (TLS) and it predecessor Secure Sockets Layer (SSL) respectively.
+                      properties:
+                        caFile:
+                          description: Absolute path to CA certificate file
+                          type: string
+                        caPath:
+                          description: Absolute path to scan for certificate files
+                          type: string
+                        crtFile:
+                          description: Absolute path to Certificate file
+                          type: string
+                        debug:
+                          description: 'Set TLS debug verbosity level. It accept the following values: 0 (No debug), 1 (Error), 2 (State change), 3 (Informational) and 4 Verbose'
+                          enum:
+                            - 0
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                          format: int32
+                          type: integer
+                        keyFile:
+                          description: Absolute path to private Key file
+                          type: string
+                        keyPassword:
+                          description: Optional password for tls.key_file file
+                          properties:
+                            valueFrom:
+                              description: ValueSource defines how to find a value's key.
+                              properties:
+                                secretKeyRef:
+                                  description: Selects a key of a secret in the pod's namespace
+                                  properties:
+                                    key:
+                                      description: The key of the secret to select from.  Must be a valid secret key.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the Secret or its key must be defined
+                                      type: boolean
+                                  required:
+                                    - key
+                                  type: object
+                                  x-kubernetes-map-type: atomic
+                              type: object
+                          type: object
+                        verify:
+                          description: Force certificate validation
+                          type: boolean
+                        vhost:
+                          description: Hostname to be used for TLS SNI extension
+                          type: string
+                      type: object
                   required:
                     - Bucket
                     - Region
