@@ -20,7 +20,7 @@ annotations:
   glueops.dev/pin.cert-manager: "v1.21.2"
   glueops.dev/pin.external-secrets: "v2.10.0"
   glueops.dev/pin.vpa: "1.6.0"
-  glueops.dev/pin.traefik: "v41.5.0"
+  glueops.dev/pin.traefik: "v41.6.0"
   glueops.dev/pin.kube-prometheus-stack: "59.1.0"
   glueops.dev/pin.keda: "v2.20.2"
   glueops.dev/pin.metacontroller: "v4.17.2"
