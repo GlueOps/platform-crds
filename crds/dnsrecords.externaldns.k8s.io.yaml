@@ -4,6 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     api-approved.kubernetes.io: https://github.com/kubernetes-sigs/external-dns/pull/5372
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
   name: dnsrecords.externaldns.k8s.io
   labels:
     platform.glueops.dev/bundle: platform-crds

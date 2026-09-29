@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/part-of: argocd
     platform.glueops.dev/bundle: platform-crds
   name: applicationsets.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
 spec:
   group: argoproj.io
   names:

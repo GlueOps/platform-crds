@@ -28,6 +28,7 @@ pin keda                 "$(grep -oE 'kedacore/keda/v[0-9.]+/' $k | head -1 | se
 pin metacontroller       "$(grep -oE 'metacontroller/metacontroller/v[0-9.]+/' $k | head -1 | sed 's#metacontroller/metacontroller/##; s#/##')"
 pin fluent-operator      "$(grep -oE 'fluent-operator-[0-9.]+/' $k | head -1 | sed 's/fluent-operator-//; s#/##')"
 pin external-dns         "$(grep -oE 'external-dns-helm-chart-[0-9.]+/' $k | head -1 | sed 's/external-dns-helm-chart-//; s#/##')"
+pin opentelemetry-operator "$(grep -oE 'open-telemetry/opentelemetry-operator/v[0-9.]+/' $k | head -1 | sed 's#open-telemetry/opentelemetry-operator/##; s#/##')"
 
 # Every name declared in pins.map must have come out of a pin call above. Catches the other half of the two-file
 # change: a repo mapped there but with no extractor line above, which would otherwise leave the annotation missing.

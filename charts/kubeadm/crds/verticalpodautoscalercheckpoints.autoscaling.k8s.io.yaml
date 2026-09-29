@@ -5,6 +5,7 @@ metadata:
   annotations:
     api-approved.kubernetes.io: https://github.com/kubernetes/kubernetes/pull/63797
     controller-gen.kubebuilder.io/version: v0.16.5
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
   name: verticalpodautoscalercheckpoints.autoscaling.k8s.io
   labels:
     platform.glueops.dev/bundle: platform-crds

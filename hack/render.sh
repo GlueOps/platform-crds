@@ -16,13 +16,25 @@ cd "$(dirname "$0")/.."
 
 BUNDLE_LABEL_KEY=platform.glueops.dev/bundle       # hack/verify.sh pins both of these
 BUNDLE_LABEL_VALUE=platform-crds
+# Argo CD honours sync-options on the LIVE object: an Application that still tracks a CRD an earlier installer
+# rendered (pre-#347 k8s-monitoring-helm installed the kube-prometheus-stack and OpenTelemetry CRDs from Argo CD
+# Applications) can then neither prune it when the CRD leaves its desired state nor cascade-delete it through its
+# resources-finalizer — either of which would garbage-collect every object of that kind. The bundle owns this
+# annotation, so it is applied once per CRD and converged on every run. hack/verify.sh pins it too.
+ARGO_SYNC_OPTIONS_KEY=argocd.argoproj.io/sync-options
+ARGO_SYNC_OPTIONS_VALUE=Prune=false,Delete=false
 
 render() {   # $1 = kustomize dir, $2 = output crds dir
-  rm -rf "$2" && mkdir -p "$2"
-  kubectl kustomize "$1" \
-    | yq -s "\"$2/\" + .metadata.name + \".yaml\"" \
-         "select(.kind==\"CustomResourceDefinition\") | .metadata.labels[\"$BUNDLE_LABEL_KEY\"] = \"$BUNDLE_LABEL_VALUE\""
-  for f in "$2"/*.yaml; do head -1 "$f" | grep -q '^---$' || sed -i '1i ---' "$f"; done
+  # Render into a scratch dir and swap it in only on success: a remote source timing out (kustomize gives a git
+  # fetch ~27s) used to leave $2 wiped, which CI then reported as drift instead of a network error.
+  local tmp; tmp=$(mktemp -d "$2.render.XXXXXX")
+  if ! kubectl kustomize "$1" \
+    | yq -s "\"$tmp/\" + .metadata.name + \".yaml\"" \
+         "select(.kind==\"CustomResourceDefinition\") | .metadata.labels[\"$BUNDLE_LABEL_KEY\"] = \"$BUNDLE_LABEL_VALUE\" | .metadata.annotations[\"$ARGO_SYNC_OPTIONS_KEY\"] = \"$ARGO_SYNC_OPTIONS_VALUE\""; then
+    rm -rf "$tmp"; echo "render.sh: rendering $1 failed; $2 left untouched" >&2; return 1
+  fi
+  for f in "$tmp"/*.yaml; do head -1 "$f" | grep -q '^---$' || sed -i '1i ---' "$f"; done
+  rm -rf "$2" && mv "$tmp" "$2"
   echo "  $(ls "$2" | wc -l) CRDs -> $2"
 }
 

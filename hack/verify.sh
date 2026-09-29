@@ -23,7 +23,11 @@ for p in $profiles; do check_render "profiles/$p" "charts/$p/crds"; done
 for d in $(crd_dirs); do for f in "$d"/*.yaml; do head -1 "$f" | grep -q '^---$' || fail "$f must start with ---"; done; done
 
 # 2. completeness of the per-file directory sources: every *.yaml upstream must be referenced or explicitly excluded
-declare -A EXCLUDE=( ["traefik/traefik-helm-chart:traefik/crds"]='^(kustomization\.yaml|gateway-standard-install\.yaml|hub\.traefik\.io_.*\.yaml)$' )
+declare -A EXCLUDE=(
+  ["traefik/traefik-helm-chart:traefik/crds"]='^(kustomization\.yaml|gateway-standard-install\.yaml|hub\.traefik\.io_.*\.yaml)$'
+  # ClusterObservability is alpha and feature-gated; the opentelemetry-operator Helm chart does not ship it (conf/crds/)
+  ["open-telemetry/opentelemetry-operator:config/crd/bases"]='^opentelemetry\.io_clusterobservabilities\.yaml$'
+)
 api() { if command -v gh >/dev/null; then gh api "$1"; else curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} "https://api.github.com/$1"; fi; }
 grep -oE 'https://raw\.githubusercontent\.com/[^ ]+' "$k" | sed -E 's#https://raw.githubusercontent.com/([^/]+/[^/]+)/([^/]+)/(.*)/[^/]+$#\1 \2 \3#' | sort -u | while read -r repo ref dir; do
   [ -n "$dir" ] || continue
@@ -61,7 +65,8 @@ done; done
 #     bump time, in this repo, rather than as a broken read on a cluster months later.
 #     To acknowledge one: audit the fleet for a stale webhook on that type
 #       kubectl get crd <name> -o jsonpath='{.spec.conversion.strategy}{"\n"}'     # must be None everywhere
-#     clear any that are not (`kubectl patch crd <name> --type=merge -p '{"spec":{"conversion":{"strategy":"None"}}}'`),
+#     clear any that are not (`kubectl patch crd <name> --type=merge -p '{"spec":{"conversion":{"strategy":"None","webhook":null}}}'`
+#     — the API server rejects strategy None while a webhook stanza is still present),
 #     record it in MIGRATIONS.md, and add the CRD name here.
 multi_version_ok=""   # empty on purpose: no CRD in the bundle serves more than one version today
 for d in $(crd_dirs); do for f in "$d"/*.yaml; do
@@ -81,6 +86,12 @@ if ! grep -qE '^BUNDLE_LABEL_KEY=platform\.glueops\.dev/bundle([[:space:]]|$)' h
   || ! grep -qE '^BUNDLE_LABEL_VALUE=platform-crds([[:space:]]|$)' hack/render.sh; then
   fail "hack/render.sh no longer stamps platform.glueops.dev/bundle=platform-crds; the check above and the README selector assume it"
 fi
+# 5d. every CRD tells Argo CD never to prune or cascade-delete it. An Application that tracked a CRD before the bundle
+#     took it over would otherwise garbage-collect every object of that kind the moment the CRD left its desired state.
+for d in $(crd_dirs); do for f in "$d"/*.yaml; do
+  [ "$(yq -N '.metadata.annotations["argocd.argoproj.io/sync-options"] // ""' "$f")" = "Prune=false,Delete=false" ] || fail "$f is missing annotation argocd.argoproj.io/sync-options=Prune=false,Delete=false — run hack/render.sh"
+done; done
+grep -qE '^ARGO_SYNC_OPTIONS_VALUE=Prune=false,Delete=false([[:space:]]|$)' hack/render.sh || fail "hack/render.sh no longer stamps argocd.argoproj.io/sync-options=Prune=false,Delete=false"
 
 # 6. package round-trip: helm show crds must yield the UNION, one document per file, and the package must carry
 #    nothing but chart metadata and CRDs (it is passed the platform chart's values file, which holds secrets)

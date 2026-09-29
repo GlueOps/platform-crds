@@ -4,6 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
   labels:
     app: cert-manager
     app.kubernetes.io/component: crds
