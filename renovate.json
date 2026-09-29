@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Version pins live in kustomization.yaml. The kustomize manager handles the argo-cd git source (?ref=); raw.githubusercontent.com file URLs need regex managers. One PR per dependency, highest version (org defaults would split minors/patches). A CI job re-renders crds/ on renovate branches.",
+  "description": "Version pins live in kustomization.yaml. The kustomize manager handles the argo-cd git source (?ref=); raw.githubusercontent.com file URLs need regex managers. One PR per dependency, highest version (org defaults would split minors/patches). A CI job re-renders crds/ on every same-repo PR branch.",
   "separateMinorPatch": false,
   "separateMultipleMinor": false,
   "kustomize": { "managerFilePatterns": ["/(^|/)kustomization\\.ya?ml$/"] },
