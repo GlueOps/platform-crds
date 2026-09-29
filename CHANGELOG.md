@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/GlueOps/platform-crds/compare/v0.1.5...v0.1.6) (2026-09-29)
+
+
+### Continuous Integration
+
+* auto-render crds/ on every same-repo PR, not just renovate ([#90](https://github.com/GlueOps/platform-crds/issues/90)) ([4f9f56e](https://github.com/GlueOps/platform-crds/commit/4f9f56efe954df102d7ef20e70903828d385635c))
+
 ## [0.1.5](https://github.com/GlueOps/platform-crds/compare/v0.1.4...v0.1.5) (2026-09-18)
 
 
