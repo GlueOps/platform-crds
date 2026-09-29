@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/GlueOps/platform-crds/compare/v0.1.4...v0.1.5) (2026-09-18)
+
+
+### Features
+
+* bump CRD sources for the Kubernetes 1.35 platform component upgrades - abandoned ([#83](https://github.com/GlueOps/platform-crds/issues/83)) ([64fedc4](https://github.com/GlueOps/platform-crds/commit/64fedc435f57f03c77a3321b8b79687c02d69c29))
+
 ## [0.1.4](https://github.com/GlueOps/platform-crds/compare/v0.1.3...v0.1.4) (2026-08-28)
 
 

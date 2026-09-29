@@ -4,8 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     api-approved.kubernetes.io: unapproved, request not yet submitted
-    controller-gen.kubebuilder.io/version: v0.18.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: controllerrevisions.metacontroller.k8s.io
   labels:
     platform.glueops.dev/bundle: platform-crds

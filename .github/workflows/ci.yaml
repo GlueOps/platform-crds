@@ -89,9 +89,8 @@ jobs:
           helm template x $tgz --include-crds -f /tmp/v.yaml >/dev/null 2>&1 && { echo "::error::helm ${{ matrix.helm }}: an empty values file rendered without error — profile keys are not mandatory"; exit 1; } || echo "helm ${{ matrix.helm }}: missing profile key rejected ✓"
 
   render-on-renovate:
-    # renovate bumps a pin but cannot re-render; do it for it so renovate PRs are green without a human render.
+    # re-render crds/ and Chart.yaml pins on every same-repo PR so nobody has to run hack/render.sh by hand.
     # The push must go through the App token: a push made with GITHUB_TOKEN never triggers a new CI run.
-    if: startsWith(github.head_ref, 'renovate/')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -111,6 +110,6 @@ jobs:
           hack/render.sh
           if [ -n "$(git status --porcelain crds charts Chart.yaml)" ]; then
             git config user.name github-actions && git config user.email github-actions[bot]@users.noreply.github.com
-            git add crds charts Chart.yaml && git commit -m "chore: re-render crds/ for renovate bump" && git push
-            echo "::notice::re-rendered crds/ and pushed to the renovate branch (re-run CI)"
+            git add crds charts Chart.yaml && git commit -m "chore: re-render crds/ and Chart.yaml pins" && git push
+            echo "::notice::re-rendered crds/ and pushed to the PR branch (re-run CI)"
           fi
