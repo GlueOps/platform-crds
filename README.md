@@ -140,8 +140,8 @@ generators) are expected. VPA is not one of them — it is profile-gated, so it 
 
 ## Adding or bumping a source
 
-**Bumping** an existing source is steps 1, 3 and 4 — normally a renovate PR, where the `render-on-renovate` job
-re-renders so the drift check passes.
+**Bumping** an existing source is steps 1, 3 and 4 — normally a renovate PR. On any same-repo PR the
+`render-on-renovate` job re-renders and commits so the drift check passes.
 
 1. Edit `kustomization.yaml` (a directory source must contain its own `kustomization.yaml` upstream — otherwise list
    the files individually).
@@ -149,5 +149,6 @@ re-renders so the drift check passes.
    `pin <name>` line to `hack/pins.sh` that parses the version out of the URL. `hack/verify.sh` fails on a repo with
    no entry — without one the source ships with no `glueops.dev/pin.<name>` annotation, and the terraform module's
    consistency check has nothing to compare against for it.
-3. `hack/render.sh && hack/verify.sh` (needs kubectl, helm, yq, jq, gh).
+3. `hack/render.sh && hack/verify.sh` (needs kubectl, helm, yq, jq, gh). Optional on same-repo PRs — CI renders and
+   commits for you; fork PRs must do it.
 4. Commit `crds/` and `Chart.yaml` with the change. CI repeats the checks and applies the bundle to kind.
