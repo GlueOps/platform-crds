@@ -91,7 +91,6 @@ jobs:
   render-on-renovate:
     # re-render crds/ and Chart.yaml pins on every same-repo PR so nobody has to run hack/render.sh by hand.
     # The push must go through the App token: a push made with GITHUB_TOKEN never triggers a new CI run.
-    if: github.event.pull_request.head.repo.full_name == github.repository   # fork PRs get no secrets
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
