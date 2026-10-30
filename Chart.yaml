@@ -25,4 +25,4 @@ annotations:
   glueops.dev/pin.keda: "v2.20.2"
   glueops.dev/pin.metacontroller: "v4.17.2"
   glueops.dev/pin.fluent-operator: "2.7.0"
-  glueops.dev/pin.external-dns: "1.22.0"
+  glueops.dev/pin.external-dns: "1.23.0"
