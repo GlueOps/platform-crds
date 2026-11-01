@@ -1,3 +1,2 @@
 resources:
-  - gates.yaml
   - lokialertrulegroups.yaml
