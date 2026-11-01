@@ -137,10 +137,9 @@ spec:
                       - message: each check must set exactly one check type
                         rule: |-
                           [has(self.deploymentAvailable), has(self.statefulSetReady),
-
-                           has(self.jobComplete), has(self.serviceReadyEndpoints),
-                           has(self.podLabelReady), has(self.argoApplicationHealthy),
-                           has(self.fluxHelmReleaseReady)].exists_one(x, x)
+                          has(self.jobComplete), has(self.serviceReadyEndpoints),
+                          has(self.podLabelReady), has(self.argoApplicationHealthy),
+                          has(self.fluxHelmReleaseReady)].exists_one(x, x)
                   maxItems: 256
                   minItems: 1
                   type: array
