@@ -25,6 +25,9 @@ spec:
         - jsonPath: .status.conditions[?(@.type=="Ready")].lastTransitionTime
           name: Last-Transition
           type: date
+        - jsonPath: .metadata.creationTimestamp
+          name: Age
+          type: date
       name: v1alpha1
       schema:
         openAPIV3Schema:
@@ -32,6 +35,7 @@ spec:
             spec:
               properties:
                 checks:
+                  description: Dependencies that must all be ready. Each entry sets exactly one check type; ids must be unique.
                   items:
                     properties:
                       argoApplicationHealthy:
@@ -137,9 +141,12 @@ spec:
                            has(self.jobComplete), has(self.serviceReadyEndpoints),
                            has(self.podLabelReady), has(self.argoApplicationHealthy),
                            has(self.fluxHelmReleaseReady)].exists_one(x, x)
-                  maxItems: 32
+                  maxItems: 256
                   minItems: 1
                   type: array
+                  x-kubernetes-list-map-keys:
+                    - id
+                  x-kubernetes-list-type: map
               required:
                 - checks
               type: object
@@ -187,6 +194,7 @@ spec:
                   minimum: 0
                   type: integer
                 results:
+                  description: Per-check verdicts from the last evaluation, one per spec.checks entry.
                   items:
                     properties:
                       id:
@@ -198,12 +206,16 @@ spec:
                       reason:
                         type: string
                       terminal:
+                        description: The dependency cannot become ready without a change; stop waiting.
                         type: boolean
                     required:
                       - id
                       - ready
                     type: object
                   type: array
+                  x-kubernetes-list-map-keys:
+                    - id
+                  x-kubernetes-list-type: map
               type: object
           required:
             - spec
