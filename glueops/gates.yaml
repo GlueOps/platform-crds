@@ -16,6 +16,16 @@ spec:
       storage: true
       subresources:
         status: {}
+      additionalPrinterColumns:
+        - name: Ready
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].status
+        - name: Reason
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].reason
+        - name: Last-Transition
+          type: date
+          jsonPath: .status.conditions[?(@.type=="Ready")].lastTransitionTime
       schema:
         openAPIV3Schema:
           type: object
@@ -25,74 +35,145 @@ spec:
               type: object
               required: ["checks"]
               properties:
-                strict:
-                  type: boolean
-                  default: true
-                  description: "If true, the gate will be marked failed if any checks reference disallowed resource kinds or targets. If false, such checks will be ignored but the gate can still pass if all other checks pass."
                 checks:
                   type: array
                   minItems: 1
+                  # maxItems is required, not cosmetic: CEL cost estimation
+                  # multiplies per-item cost by maxItems, and an unbounded list can
+                  # get the whole CRD rejected at apply time.
+                  maxItems: 32
                   items:
                     type: object
                     required: ["id"]
+                    # Structural pruning drops an unknown field before validation, so
+                    # a misspelled check type (deploymentAvailible) would leave a
+                    # check with only an id and silently verify nothing. kubectl
+                    # catches that itself (it defaults to strict field validation and
+                    # names the unknown field), so this rule exists for the clients
+                    # that don't -- notably Argo CD.
+                    #
+                    # It does not help with a misspelled field *inside* a check block:
+                    # `minAvailableReplcias: 5` is pruned and silently defaulted to 1,
+                    # and only strict field validation catches that.
+                    x-kubernetes-validations:
+                      - rule: >-
+                          [has(self.deploymentAvailable), has(self.statefulSetReady),
+                           has(self.jobComplete), has(self.serviceReadyEndpoints),
+                           has(self.podLabelReady), has(self.argoApplicationHealthy),
+                           has(self.fluxHelmReleaseReady)].exists_one(x, x)
+                        message: "each check must set exactly one check type"
                     properties:
                       id:
                         type: string
                         minLength: 1
                         maxLength: 63
+                      # Defaults to the Gate's own namespace. A different namespace
+                      # requires the Gate's namespace to be in platform mode and the
+                      # target to be on gatekeeper's allowlist.
                       namespace:
                         type: string
                         minLength: 1
                         maxLength: 63
+
+                      # Exactly one of the blocks below must be set.
                       deploymentAvailable:
                         type: object
                         required: ["name"]
                         properties:
-                          name: {type: string, minLength: 1}
-                          minAvailableReplicas: {type: integer, minimum: 0, default: 1}
+                          name: { type: string, minLength: 1 }
+                          minAvailableReplicas: { type: integer, minimum: 0, default: 1 }
+
                       statefulSetReady:
                         type: object
                         required: ["name"]
                         properties:
-                          name: {type: string, minLength: 1}
-                          minReadyReplicas: {type: integer, minimum: 0, default: 1}
-                          requireUpdatedRevision: {type: boolean, default: true}
+                          name: { type: string, minLength: 1 }
+                          minReadyReplicas: { type: integer, minimum: 0, default: 1 }
+                          requireUpdatedRevision: { type: boolean, default: true }
+
                       jobComplete:
                         type: object
                         required: ["name"]
                         properties:
-                          name: {type: string, minLength: 1}
+                          name: { type: string, minLength: 1 }
+
                       serviceReadyEndpoints:
                         type: object
                         required: ["name"]
                         properties:
-                          name: {type: string, minLength: 1}
-                          minReadyAddresses: {type: integer, minimum: 0, default: 1}
+                          name: { type: string, minLength: 1 }
+                          minReadyAddresses: { type: integer, minimum: 0, default: 1 }
+
                       podLabelReady:
                         type: object
                         required: ["selector"]
                         properties:
-                          selector: {type: string, minLength: 1}
-                          minReadyPods: {type: integer, minimum: 0, default: 1}
+                          selector: { type: string, minLength: 1 } # label selector string
+                          minReadyPods: { type: integer, minimum: 0, default: 1 }
+
                       argoApplicationHealthy:
                         type: object
                         required: ["name"]
                         properties:
-                          name: {type: string, minLength: 1}
-                          requireSynced: {type: boolean, default: true}
-                          requireHealthy: {type: boolean, default: true}
+                          name: { type: string, minLength: 1 }
+                          requireSynced: { type: boolean, default: true }
+                          requireHealthy: { type: boolean, default: true }
+
+                      # Flux helm.toolkit.fluxcd.io/v2 HelmRelease. Prefer this over
+                      # pointing deploymentAvailable at the workload a HelmRelease
+                      # manages: during a failed upgrade the Deployment check reports
+                      # ready against the previous revision's pods while the release
+                      # behind them is broken.
+                      fluxHelmReleaseReady:
+                        type: object
+                        required: ["name"]
+                        properties:
+                          name: { type: string, minLength: 1 }
+                          # Require status.observedGeneration to have caught up with
+                          # metadata.generation. With this false the Ready condition is
+                          # trusted even when it describes an older revision.
+                          requireCurrentGeneration: { type: boolean, default: true }
+
             status:
               type: object
               properties:
-                observedGeneration: {type: integer}
-                ready: {type: boolean}
-                lastEvaluatedTime: {type: string, format: date-time}
+                observedGeneration: { type: integer, minimum: 0 }
+                conditions:
+                  type: array
+                  # Gatekeeper computes the whole array each sweep, but the list-map
+                  # keying makes a duplicate Ready condition a validation error rather
+                  # than something a consumer has to disambiguate.
+                  x-kubernetes-list-type: map
+                  x-kubernetes-list-map-keys: ["type"]
+                  items:
+                    type: object
+                    # Mirrors metav1.Condition, so generated typed clients see the
+                    # shape they expect.
+                    required: ["type", "status", "reason", "message", "lastTransitionTime"]
+                    properties:
+                      type: { type: string, minLength: 1, maxLength: 316 }
+                      status:
+                        type: string
+                        enum: ["True", "False", "Unknown"]
+                      reason:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
+                        pattern: '^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$'
+                      message: { type: string, maxLength: 32768 }
+                      lastTransitionTime: { type: string, format: date-time }
+                      observedGeneration: { type: integer, minimum: 0 }
                 results:
                   type: array
                   items:
                     type: object
                     required: ["id", "ready"]
                     properties:
-                      id: {type: string}
-                      ready: {type: boolean}
-                      message: {type: string}
+                      id: { type: string }
+                      ready: { type: boolean }
+                      reason: { type: string }
+                      message: { type: string }
+                      # True when the dependency cannot become ready without a change
+                      # (a failed Job, a Degraded Application, a stalled HelmRelease),
+                      # so a consumer should stop waiting rather than time out.
+                      terminal: { type: boolean }
