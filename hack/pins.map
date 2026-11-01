@@ -13,6 +13,7 @@ declare -A PIN_FOR_REPO=(
   [argoproj/argo-cd]=argo-cd
   [cert-manager/cert-manager]=cert-manager
   [external-secrets/external-secrets]=external-secrets
+  [GlueOps/platform-gatekeeper]=gatekeeper
   [fluent/helm-charts]=fluent-operator
   [kedacore/keda]=keda
   [kubernetes/autoscaler]=vpa
