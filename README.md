@@ -56,8 +56,11 @@ behaviour, not something to work around here.
 
 ## How it works
 
-- `kustomization.yaml` is the **only hand-edited manifest**: one line per upstream source, pinned by tag/URL. Adding a
+- `kustomization.yaml` is the hand-edited **source list**: one line per upstream source, pinned by tag/URL. Adding a
   CRD set is one line; bumping a version is a renovate PR.
+- `glueops/` holds the **first-party** CRDs this platform defines itself, vendored rather than pinned. They are
+  hand-maintained: there is no upstream to bump, so neither renovate nor `verify.sh`'s pin and completeness checks
+  cover them. Keep them in step with the repo that owns the controller by hand.
 - `hack/render.sh` regenerates `crds/` — one file per CRD, each starting with `---` (required: `helm show crds`
   concatenates the files without separators) — and stamps the upstream pins into `Chart.yaml` annotations
   (`glueops.dev/pin.<source>`), which the terraform module's consistency check compares against the platform chart.

@@ -15,13 +15,27 @@ spec:
     singular: gate
   scope: Namespaced
   versions:
-    - name: v1alpha1
+    - additionalPrinterColumns:
+        - jsonPath: .status.conditions[?(@.type=="Ready")].status
+          name: Ready
+          type: string
+        - jsonPath: .status.conditions[?(@.type=="Ready")].reason
+          name: Reason
+          type: string
+        - jsonPath: .status.conditions[?(@.type=="Ready")].lastTransitionTime
+          name: Last-Transition
+          type: date
+        - jsonPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+      name: v1alpha1
       schema:
         openAPIV3Schema:
           properties:
             spec:
               properties:
                 checks:
+                  description: Dependencies that must all be ready. Each entry sets exactly one check type; ids must be unique.
                   items:
                     properties:
                       argoApplicationHealthy:
@@ -47,6 +61,17 @@ spec:
                           name:
                             minLength: 1
                             type: string
+                        required:
+                          - name
+                        type: object
+                      fluxHelmReleaseReady:
+                        properties:
+                          name:
+                            minLength: 1
+                            type: string
+                          requireCurrentGeneration:
+                            default: true
+                            type: boolean
                         required:
                           - name
                         type: object
@@ -108,25 +133,67 @@ spec:
                     required:
                       - id
                     type: object
+                    x-kubernetes-validations:
+                      - message: each check must set exactly one check type
+                        rule: |-
+                          [has(self.deploymentAvailable), has(self.statefulSetReady),
+                          has(self.jobComplete), has(self.serviceReadyEndpoints),
+                          has(self.podLabelReady), has(self.argoApplicationHealthy),
+                          has(self.fluxHelmReleaseReady)].exists_one(x, x)
+                  maxItems: 256
                   minItems: 1
                   type: array
-                strict:
-                  default: true
-                  description: If true, the gate will be marked failed if any checks reference disallowed resource kinds or targets. If false, such checks will be ignored but the gate can still pass if all other checks pass.
-                  type: boolean
+                  x-kubernetes-list-map-keys:
+                    - id
+                  x-kubernetes-list-type: map
               required:
                 - checks
               type: object
             status:
               properties:
-                lastEvaluatedTime:
-                  format: date-time
-                  type: string
+                conditions:
+                  items:
+                    properties:
+                      lastTransitionTime:
+                        format: date-time
+                        type: string
+                      message:
+                        maxLength: 32768
+                        type: string
+                      observedGeneration:
+                        minimum: 0
+                        type: integer
+                      reason:
+                        maxLength: 1024
+                        minLength: 1
+                        pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                        type: string
+                      status:
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                        type: string
+                      type:
+                        maxLength: 316
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                      - status
+                      - reason
+                      - message
+                      - lastTransitionTime
+                    type: object
+                  type: array
+                  x-kubernetes-list-map-keys:
+                    - type
+                  x-kubernetes-list-type: map
                 observedGeneration:
+                  minimum: 0
                   type: integer
-                ready:
-                  type: boolean
                 results:
+                  description: Per-check verdicts from the last evaluation, one per spec.checks entry.
                   items:
                     properties:
                       id:
@@ -135,11 +202,19 @@ spec:
                         type: string
                       ready:
                         type: boolean
+                      reason:
+                        type: string
+                      terminal:
+                        description: The dependency cannot become ready without a change; stop waiting.
+                        type: boolean
                     required:
                       - id
                       - ready
                     type: object
                   type: array
+                  x-kubernetes-list-map-keys:
+                    - id
+                  x-kubernetes-list-type: map
               type: object
           required:
             - spec
