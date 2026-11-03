@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.6](https://github.com/GlueOps/platform-crds/compare/v0.1.5...v0.1.6) (2026-11-03)
+
+
+### Features
+
+* **deps:** bump external-secrets CRDs to v2.14.0 ([#111](https://github.com/GlueOps/platform-crds/issues/111)) ([b076d47](https://github.com/GlueOps/platform-crds/commit/b076d475d7f0ddef035529124c57ec397c5742de))
+* **deps:** update actions/create-github-app-token action to v3.3.0 ([#108](https://github.com/GlueOps/platform-crds/issues/108)) ([41483fa](https://github.com/GlueOps/platform-crds/commit/41483fae5314a4839c77c9f72a6398ebc7d5a3fb))
+* **deps:** update dependency kubernetes-sigs/external-dns to v1.23.0 ([#102](https://github.com/GlueOps/platform-crds/issues/102)) ([3bd2a8d](https://github.com/GlueOps/platform-crds/commit/3bd2a8dfb54d91eb36cd2bfbc8471e9519f7e0bd))
+* **deps:** update dependency traefik/traefik-helm-chart to v42 ([#109](https://github.com/GlueOps/platform-crds/issues/109)) ([4a5bdba](https://github.com/GlueOps/platform-crds/commit/4a5bdbad87f7a398c54447f6fb7ad15aa67233ae))
+* **deps:** update helm/kind-action action to v1.15.0 ([#94](https://github.com/GlueOps/platform-crds/issues/94)) ([973148e](https://github.com/GlueOps/platform-crds/commit/973148e8346d6423bee2a1d14aaab5fb70ce9e98))
+
+
+### Bug Fixes
+
+* **deps:** pin VPA CRDs to 1.7.3 ([df3ee21](https://github.com/GlueOps/platform-crds/commit/df3ee21eae19ae2f121a4320826d9048174e8a87))
+
+
+### Continuous Integration
+
+* auto-render crds/ on every same-repo PR, not just renovate ([#90](https://github.com/GlueOps/platform-crds/issues/90)) ([4f9f56e](https://github.com/GlueOps/platform-crds/commit/4f9f56efe954df102d7ef20e70903828d385635c))
+
+
+### Dependencies
+
+* pin Argo CD CRDs to v3.4.13 ([df3ee21](https://github.com/GlueOps/platform-crds/commit/df3ee21eae19ae2f121a4320826d9048174e8a87))
+* update dependency cert-manager/cert-manager to v1.21.3 ([#106](https://github.com/GlueOps/platform-crds/issues/106)) ([27278fb](https://github.com/GlueOps/platform-crds/commit/27278fb4e926cecbb8acb3b7676f1a67a9543cc0))
+* update dependency metacontroller/metacontroller to v4.17.6 ([#107](https://github.com/GlueOps/platform-crds/issues/107)) ([68066d2](https://github.com/GlueOps/platform-crds/commit/68066d212adcf69fa562b90791f8168c73d12924))
+
 ## [0.1.5](https://github.com/GlueOps/platform-crds/compare/v0.1.4...v0.1.5) (2026-09-18)
 
 
